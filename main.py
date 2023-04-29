@@ -3,6 +3,7 @@
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 
+from pygame.locals import *
 import pygame
 import sys
 import time
@@ -21,8 +22,8 @@ def gameLoop():
 
     sound_picon = pygame.mixer.Sound('決定ボタンを押す3.mp3')
     sound_picon.play()
-    time.sleep(1)
-    sound_picon.stop()
+#    time.sleep(1)
+#    sound_picon.stop()
 
     files = glob.glob("./wav/alphabet*.wav")
     files = sorted(files)
@@ -35,15 +36,22 @@ def gameLoop():
                             )
         DISPLAYSURF.blit(textSurfaceObj, textRectObj)
 
-        for s in sound_alphabet:
-            s.play()
-            time.sleep(1)
-            s.stop()
+#        for s in sound_alphabet:
+#            s.play()
+#            time.sleep(1)
+#            s.stop()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
+                else:
+                    print(pygame.key.name(event.key))
+
         pygame.display.update()
 
 # Press the green button in the gutter to run the script.
