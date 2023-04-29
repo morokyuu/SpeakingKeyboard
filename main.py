@@ -26,8 +26,9 @@ def speak_key(keyname, sound):
 
 class AlphabetFont:
     def __init__(self,char="hit any key"):
-        self.count = 0
-        fontObj = pygame.font.Font('freesansbold.ttf', 100)
+        fontObj = pygame.font.Font('freesansbold.ttf', 130)
+        if len(char)==1:
+            char = " " + char + " "
         self.charSurfaceObj = fontObj.render(char, True, GREEN, BLUE)
         self.charRectObj = self.charSurfaceObj.get_rect()
         self.charRectObj.center = (300, 300)
@@ -36,8 +37,8 @@ class AlphabetFont:
         return
 
 def gameLoop():
-    fontObj = pygame.font.Font('freesansbold.ttf', 100)
-    textSurfaceObj = fontObj.render("Keyboard", True, GREEN, BLUE)
+    fontObj = pygame.font.Font('freesansbold.ttf', 60)
+    textSurfaceObj = fontObj.render("Speaking Keyboard", True, GREEN, BLUE)
     textRectObj = textSurfaceObj.get_rect()
     textRectObj.center = (300, 150)
 
@@ -78,7 +79,8 @@ def gameLoop():
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     pygame.init()
-    DISPLAYSURF = pygame.display.set_mode((600, 500), 0, 32)
+    flags = pygame.FULLSCREEN
+    DISPLAYSURF = pygame.display.set_mode(size=(640,480), display=0, depth=32, flags=pygame.FULLSCREEN)
     pygame.display.set_caption('Hit any key')
     gameLoop()
 
