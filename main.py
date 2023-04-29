@@ -22,8 +22,6 @@ def gameLoop():
 
     sound_picon = pygame.mixer.Sound('決定ボタンを押す3.mp3')
     sound_picon.play()
-#    time.sleep(1)
-#    sound_picon.stop()
 
     files = glob.glob("./wav/alphabet*.wav")
     files = sorted(files)
@@ -50,7 +48,11 @@ def gameLoop():
                     pygame.quit()
                     sys.exit()
                 else:
-                    print(pygame.key.name(event.key))
+                    keyname = pygame.key.name(event.key)
+                    print(keyname)
+                    print(ord(keyname)-0x61)
+                    idx = ord(keyname) - 0x61
+                    sound_alphabet[idx].play()
 
         pygame.display.update()
 
