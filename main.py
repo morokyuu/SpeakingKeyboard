@@ -5,6 +5,8 @@
 
 import pygame
 import sys
+import time
+import glob
 
 GREEN = (0,255,0)
 BLUE = (0,0,123)
@@ -17,6 +19,14 @@ def gameLoop():
     textRectObj = textSurfaceObj.get_rect()
     textRectObj.center = (300,150)
 
+    sound_picon = pygame.mixer.Sound('決定ボタンを押す3.mp3')
+    sound_picon.play()
+    time.sleep(1)
+    sound_picon.stop()
+
+    files = glob.glob("./wav/alphabet*.wav")
+    sound_alphabet = [pygame.mixer.Sound(f) for f in files]
+
     while True:
         DISPLAYSURF.fill(WHITE)
         pygame.draw.polygon(DISPLAYSURF, GREEN,
@@ -24,6 +34,10 @@ def gameLoop():
                             )
         DISPLAYSURF.blit(textSurfaceObj, textRectObj)
 
+        for s in sound_alphabet:
+            s.play()
+            time.sleep(1)
+            s.stop()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
