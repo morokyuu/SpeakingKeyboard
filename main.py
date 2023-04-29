@@ -25,6 +25,7 @@ def gameLoop():
     sound_picon.stop()
 
     files = glob.glob("./wav/alphabet*.wav")
+    files = sorted(files)
     sound_alphabet = [pygame.mixer.Sound(f) for f in files]
 
     while True:
