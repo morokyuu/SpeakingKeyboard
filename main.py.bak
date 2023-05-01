@@ -28,8 +28,6 @@ class AlphabetFont:
     def __init__(self,char="hit any key"):
         fontObj = pygame.font.Font('freesansbold.ttf', 130)
         if len(char)==1:
-            if 0x61 <= ord(char) and ord(char) <= 0x7a:
-                char = chr(ord(char) - 0x20)
             char = " " + char + " "
         self.charSurfaceObj = fontObj.render(char, True, GREEN, BLUE)
         self.charRectObj = self.charSurfaceObj.get_rect()
