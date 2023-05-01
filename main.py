@@ -68,10 +68,16 @@ class GameLoop:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
+                ##capslockのランプがついたときに終了したので、これは単独のキーとして入力されるものではないことがわかる。
+                ##つまりcapslock単体を押しただけでは、pygameの中で認識することができない。じゃあどうすればいいのか
+                if event.key == pygame.K_CAPSLOCK:
+                    pygame.quit()
+                    sys.exit()
+                elif event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()
                 elif event.key == pygame.K_CAPSLOCK:
+                    ## https://www.pygame.org/docs/ref/key.html#pygame.key.name
                     print("capslock")
                 else:
                     keyname = pygame.key.name(event.key)
