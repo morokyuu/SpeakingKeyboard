@@ -61,7 +61,7 @@ class GameLoop:
         self.sound_alphabet = [pygame.mixer.Sound(f) for f in files]
         return
 
-    def input_key(self):
+    def input_key(self) -> str | None:
         keyname = None
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
