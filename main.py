@@ -71,6 +71,8 @@ class GameLoop:
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()
+                elif event.key == pygame.K_CAPSLOCK:
+                    print("capslock")
                 else:
                     keyname = pygame.key.name(event.key)
         return keyname
@@ -87,7 +89,7 @@ class GameLoop:
             if keyname is None:
                 pass
             else:
-                print(keyname)
+                print(f"{keyname} len={len(keyname)}")
 
             if keyname is None:
                 pass
