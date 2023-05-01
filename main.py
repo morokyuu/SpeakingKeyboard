@@ -15,7 +15,7 @@ WHITE = (255, 255, 255)
 
 
 def speak_key(keyname, sound):
-    print(keyname)
+    #print(keyname)
     if len(keyname) == 1:
         if keyname.islower():
             idx = ord(keyname) - 0x61
@@ -84,6 +84,10 @@ class GameLoop:
             DISPLAYSURF.blit(self.textSurfaceObj, self.textRectObj)
 
             keyname = self.input_key()
+            if keyname is None:
+                pass
+            else:
+                print(keyname)
 
             if keyname is None:
                 pass
