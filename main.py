@@ -17,8 +17,7 @@ WHITE = (255, 255, 255)
 def speak_key(keyname, sound):
     print(keyname)
     if len(keyname) == 1:
-        val = ord(keyname)
-        if 0x61 <= val and val <= 0x7a:
+        if keyname.islower():
             idx = ord(keyname) - 0x61
             sound[idx].play()
     else:
@@ -28,8 +27,8 @@ class AlphabetFont:
     def __init__(self,char="hit any key"):
         fontObj = pygame.font.Font('freesansbold.ttf', 130)
         if len(char)==1:
-            if 0x61 <= ord(char) and ord(char) <= 0x7a:
-                char = chr(ord(char) - 0x20)
+            if char.islower():
+                char = char.upper()
             char = " " + char + " "
         self.charSurfaceObj = fontObj.render(char, True, GREEN, BLUE)
         self.charRectObj = self.charSurfaceObj.get_rect()
