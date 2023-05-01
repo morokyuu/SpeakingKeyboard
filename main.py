@@ -37,52 +37,70 @@ class AlphabetFont:
         DISPLAYSURF.blit(self.charSurfaceObj, self.charRectObj)
         return
 
-def gameLoop():
-    fontObj = pygame.font.Font('freesansbold.ttf', 60)
-    textSurfaceObj = fontObj.render("Speaking Keyboard", True, GREEN, BLUE)
-    textRectObj = textSurfaceObj.get_rect()
-    textRectObj.center = (300, 150)
 
-    sound_picon = pygame.mixer.Sound('決定ボタンを押す3.mp3')
-    sound_picon.play()
+class State:
+    def __init__(self):
+        return
 
-    files = glob.glob("./wav/alphabet*.wav")
-    files = sorted(files)
-    sound_alphabet = [pygame.mixer.Sound(f) for f in files]
+    def transition(self):
+        return
 
-    char = AlphabetFont()
 
-    while True:
-        DISPLAYSURF.fill(WHITE)
-        pygame.draw.polygon(DISPLAYSURF, GREEN,
-                            ((146, 0), (291, 106), (236, 277), (56, 277), (0, 106))
-                            )
-        DISPLAYSURF.blit(textSurfaceObj, textRectObj)
+class GameLoop:
+    def __init__(self):
+        fontObj = pygame.font.Font('freesansbold.ttf', 60)
+        self.textSurfaceObj = fontObj.render("Speaking Keyboard", True, GREEN, BLUE)
+        self.textRectObj = self.textSurfaceObj.get_rect()
+        self.textRectObj.center = (300, 150)
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
+        self.sound_picon = pygame.mixer.Sound('決定ボタンを押す3.mp3')
+        self.sound_picon.play()
+
+        files = glob.glob("./wav/alphabet*.wav")
+        files = sorted(files)
+        self.sound_alphabet = [pygame.mixer.Sound(f) for f in files]
+        return
+
+    def do(self):
+        char = AlphabetFont()
+        while True:
+            keyname = None
+            DISPLAYSURF.fill(WHITE)
+            pygame.draw.polygon(DISPLAYSURF, GREEN,
+                                ((146, 0), (291, 106), (236, 277), (56, 277), (0, 106))
+                                )
+            DISPLAYSURF.blit(self.textSurfaceObj, self.textRectObj)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                else:
-                    keyname = pygame.key.name(event.key)
-                    speak_key(keyname, sound_alphabet)
-                    char = AlphabetFont(keyname)
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        pygame.quit()
+                        sys.exit()
+                    else:
+                        keyname = pygame.key.name(event.key)
 
-        char.draw()
+            if keyname is None:
+                pass
+            else:
+                speak_key(keyname, self.sound_alphabet)
+                char = AlphabetFont(keyname)
 
-        pygame.display.update()
+            char.draw()
+            pygame.display.update()
 
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     pygame.init()
     flags = pygame.FULLSCREEN
-    DISPLAYSURF = pygame.display.set_mode(size=(640,480), display=0, depth=32, flags=pygame.FULLSCREEN)
+    #DISPLAYSURF = pygame.display.set_mode(size=(640,480), display=0, depth=32, flags=pygame.FULLSCREEN)
+    DISPLAYSURF = pygame.display.set_mode(size=(640,480), display=0, depth=32)
     pygame.display.set_caption('Hit any key')
-    gameLoop()
+    g = GameLoop()
+    while True:
+        g.do()
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
