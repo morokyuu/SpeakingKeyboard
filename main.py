@@ -61,26 +61,29 @@ class GameLoop:
         self.sound_alphabet = [pygame.mixer.Sound(f) for f in files]
         return
 
+    def input_key(self):
+        keyname = None
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
+                else:
+                    keyname = pygame.key.name(event.key)
+        return keyname
     def do(self):
         char = AlphabetFont()
         while True:
-            keyname = None
             DISPLAYSURF.fill(WHITE)
             pygame.draw.polygon(DISPLAYSURF, GREEN,
                                 ((146, 0), (291, 106), (236, 277), (56, 277), (0, 106))
                                 )
             DISPLAYSURF.blit(self.textSurfaceObj, self.textRectObj)
 
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        pygame.quit()
-                        sys.exit()
-                    else:
-                        keyname = pygame.key.name(event.key)
+            keyname = self.input_key()
 
             if keyname is None:
                 pass
