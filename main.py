@@ -3,11 +3,15 @@
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 
+# 音声素材
+# https://amitaro.net/voice/yomiage_01/
+
 from pygame.locals import *
 import pygame
 import sys
 import time
 import glob
+from threading import Timer
 
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 123)
