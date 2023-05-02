@@ -65,6 +65,10 @@ class GameLoop:
     def input_key(self) -> str | None:
         keyname = None
         for event in pygame.event.get():
+            if event.type == pygame.TEXTEDITING:
+                #if enter this mode, next key event will be treated as ESC to exit text-editing mode.
+                print("text-editing")
+
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
