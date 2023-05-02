@@ -8,6 +8,7 @@ import pygame
 import sys
 import time
 import glob
+from enum import Enum
 
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 123)
@@ -47,7 +48,13 @@ class State:
         return
 
 
+class KeyState(Enum):
+    NORMAL = 1
+    EDITING = 2
+
+
 class GameLoop:
+
     def __init__(self):
         fontObj = pygame.font.Font('freesansbold.ttf', 60)
         self.textSurfaceObj = fontObj.render("Speaking Keyboard", True, GREEN, BLUE)
@@ -60,32 +67,54 @@ class GameLoop:
         files = glob.glob("./wav/alphabet*.wav")
         files = sorted(files)
         self.sound_alphabet = [pygame.mixer.Sound(f) for f in files]
+
+        self.state = KeyState.NORMAL
         return
 
-    def input_key(self) -> str | None:
+    def normal_mode(self,event):
         keyname = None
-        for event in pygame.event.get():
-            if event.type == pygame.TEXTEDITING:
-                #if enter this mode, next key event will be treated as ESC to exit text-editing mode.
-                print("text-editing")
+        if event.type == pygame.TEXTEDITING:
+            # if enter this mode, next key event will be treated as ESC to exit text-editing mode.
+            print("text-editing")
+            self.state = KeyState.EDITING
 
-            if event.type == pygame.QUIT:
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.KEYDOWN:
-                if event.mod == pygame.KMOD_NONE:
-                    pass
-                else:
-                    if event.mod & pygame.KMOD_CAPS:
-                        ## https://www.pygame.org/docs/ref/key.html#pygame.key.name
-                        print("capslock")
-
-                if event.key == pygame.K_ESCAPE:
-                    pygame.quit()
-                    sys.exit()
-                else:
-                    keyname = pygame.key.name(event.key)
+            else:
+                keyname = pygame.key.name(event.key)
         return keyname
+
+    def editing_mode(self,event):
+        keyname = None
+        if event.type == pygame.TEXTEDITING:
+            # if enter this mode, next key event will be treated as ESC to exit text-editing mode.
+            print("text-editing")
+            self.state = KeyState.EDITING
+
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                pygame.quit()
+                sys.exit()
+            else:
+                keyname = pygame.key.name(event.key)
+        return keyname
+    def input_key(self) -> str | None:
+
+        for event in pygame.event.get():
+            if self.state == KeyState.NORMAL:
+                self.normal_mode(event)
+            if self.state == KeyState.EDITING:
+                self.editing_mode(event)
+        return keyname
+
     def do(self):
         char = AlphabetFont()
         while True:
