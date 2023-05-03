@@ -83,6 +83,8 @@ class GameLoop:
             elif keyname.isdigit():
                 idx = int(keyname)
                 self.sound_number[idx].play()
+            elif keyname in '.;:@/':
+                self.sound_symbol[keyname].play()
         else:
             return
 
