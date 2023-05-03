@@ -14,14 +14,6 @@ BLUE = (0, 0, 123)
 WHITE = (255, 255, 255)
 
 
-def speak_key(keyname, sound):
-    #print(keyname)
-    if len(keyname) == 1:
-        if keyname.islower():
-            idx = ord(keyname) - 0x61
-            sound[idx].play()
-    else:
-        return
 
 class AlphabetFont:
     def __init__(self,char="hit any key"):
@@ -59,6 +51,13 @@ class GameLoop:
         files = glob.glob("./wav/alphabet*.wav")
         files = sorted(files)
         self.sound_alphabet = [pygame.mixer.Sound(f) for f in files]
+
+        files = glob.glob("./wav/number/*.mp3")
+        files = sorted(files)
+        self.sound_number = [pygame.mixer.Sound(f) for f in files]
+
+        files = {'.':"dot.mp3",';':"semicolon.mp3",'/':"slash.mp3",':':"colon.mp3",'@':"at.mp3"}
+        self.sound_symbol = {f:pygame.mixer.Sound("./wav/symbol/"+files[f]) for f in files.keys()}
         return
 
     def input_key(self) -> str | None:
@@ -74,6 +73,21 @@ class GameLoop:
                 else:
                     keyname = pygame.key.name(event.key)
         return keyname
+
+    def speak_key(self,keyname):
+        #print(keyname)
+        if len(keyname) == 1:
+            if keyname.islower():
+                idx = ord(keyname) - 0x61
+                self.sound_alphabet[idx].play()
+            elif keyname.isdigit():
+                idx = int(keyname)
+                self.sound_number[idx].play()
+            elif keyname in '.;:@/':
+                self.sound_symbol[keyname].play()
+        else:
+            return
+
     def do(self):
         char = AlphabetFont()
         while True:
@@ -92,7 +106,7 @@ class GameLoop:
             if keyname is None:
                 pass
             else:
-                speak_key(keyname, self.sound_alphabet)
+                self.speak_key(keyname)
                 char = AlphabetFont(keyname)
 
             char.draw()
