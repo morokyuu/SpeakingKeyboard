@@ -54,8 +54,10 @@ class GameLoop:
 
         files = glob.glob("./wav/number/*.mp3")
         files = sorted(files)
-        print(files)
         self.sound_number = [pygame.mixer.Sound(f) for f in files]
+
+        files = {'.':"dot.mp3",';':"semicolon.mp3",'/':"slash.mp3",':':"colon.mp3",'@':"at.mp3"}
+        self.sound_symbol = {f:pygame.mixer.Sound("./wav/symbol/"+files[f]) for f in files.keys()}
         return
 
     def input_key(self) -> str | None:
