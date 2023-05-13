@@ -11,7 +11,7 @@ import pygame
 import sys
 import time
 import glob
-from threading import Timer
+from threading import Thread
 
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 123)
@@ -45,16 +45,17 @@ class State:
         return
 
 
-class SpellingObserver(Timer):
+class SpellingObserver(Thread):
     def __init__(self,input_buffer):
-        super(SpellingObserver,self).__init__(1,self.latch)
+        super(SpellingObserver,self).__init__()
         self.input_buffer = input_buffer
         return
 
-    def latch(self):
-        print("hello")
-        print(self.input_buffer)
-        return
+    def run(self):
+        while True:
+            print("hello")
+            print(self.input_buffer)
+            time.sleep(1)
 
 class GameLoop:
     def __init__(self):
@@ -78,14 +79,10 @@ class GameLoop:
         self.sound_symbol = {f:pygame.mixer.Sound("./wav/symbol/"+files[f]) for f in files.keys()}
 
         self.input_buffer = []
-        self.so = Timer(1,self.latch)
+        self.so = SpellingObserver(self.input_buffer)
         self.so.start()
         #self.so = SpellingObserver(self.input_buffer)
         return
-
-    def latch(self):
-        print("hello")
-        print(self.input_buffer)
 
     def input_key(self) -> str | None:
         keyname = None
