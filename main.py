@@ -89,7 +89,7 @@ class GameLoop:
             return
 
     def do(self):
-        char = FontDisplay()
+        fontd = FontDisplay()
         while True:
             DISPLAYSURF.fill(WHITE)
             pygame.draw.polygon(DISPLAYSURF, GREEN,
@@ -107,9 +107,9 @@ class GameLoop:
                 pass
             else:
                 self.speak_key(keyname)
-                char = FontDisplay(keyname)
+                fontd = FontDisplay(keyname)
 
-            char.draw()
+            fontd.draw()
             pygame.display.update()
 
 
