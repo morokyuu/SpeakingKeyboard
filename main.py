@@ -15,7 +15,7 @@ WHITE = (255, 255, 255)
 
 
 
-class AlphabetFont:
+class FontDisplay:
     def __init__(self,char="hit any key"):
         fontObj = pygame.font.Font('freesansbold.ttf', 130)
         if len(char)==1:
@@ -89,7 +89,7 @@ class GameLoop:
             return
 
     def do(self):
-        char = AlphabetFont()
+        char = FontDisplay()
         while True:
             DISPLAYSURF.fill(WHITE)
             pygame.draw.polygon(DISPLAYSURF, GREEN,
@@ -107,7 +107,7 @@ class GameLoop:
                 pass
             else:
                 self.speak_key(keyname)
-                char = AlphabetFont(keyname)
+                char = FontDisplay(keyname)
 
             char.draw()
             pygame.display.update()
