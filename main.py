@@ -58,8 +58,8 @@ class SpellingObserver(Thread):
 
     def run(self):
         while self.running:
-            time.sleep(0.8)
-            if len(self.input_buffer) > 3:
+            time.sleep(3)
+            if len(self.input_buffer) > 0:
                 print(self.input_buffer)
                 self.input_buffer.clear()
 
