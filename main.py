@@ -59,25 +59,37 @@ class KeyEvent(Enum):
     TIMEOUT = 2
 
 
+class InputBuff:
+    def __init__(self):
+        self.buff = []
+
+    def add(self,char):
+        self.buff += char
+
+
+    def clear(self):
+        self.buff.clear()
+
+
 class SpellingObserver(Thread):
 
-    def __init__(self,input_buffer):
+    def __init__(self):
         super(SpellingObserver,self).__init__()
-        self.input_buffer = input_buffer
+        self.input_buffer = []
         self.running = True
         self.state = KeyState.WAIT
         self.event = KeyEvent.NOTHING
         return
 
+    def input(self,keyname):
+        self.input_buffer += keyname
+        print(self.input_buffer)
+        self.event = KeyEvent.CHANGED
+        print("buffer changed")
+
     def halt(self):
         self.running = False
 
-    def observe(self):
-        if self.curr_len > self.prev_len:
-            self.prev_len = self.curr_len
-            print(self.input_buffer)
-            self.event = KeyEvent.CHANGED
-            print("buffer changed")
 
     def timerout(self):
         self.event = KeyEvent.TIMEOUT
@@ -91,14 +103,10 @@ class SpellingObserver(Thread):
         #spell was matched and execute special effect
         pass
     def run(self):
-        self.prev_len = 0
-        self.curr_len = 0
         self.timer = None
 
         while self.running:
             self.curr_len = len(self.input_buffer)
-
-            self.observe()
 
             if self.state == KeyState.WAIT:
                 if self.event == KeyEvent.CHANGED:
@@ -148,8 +156,7 @@ class GameLoop:
         files = {'.':"dot.mp3",';':"semicolon.mp3",'/':"slash.mp3",':':"colon.mp3",'@':"at.mp3"}
         self.sound_symbol = {f:pygame.mixer.Sound("./wav/symbol/"+files[f]) for f in files.keys()}
 
-        self.input_buffer = []
-        self.so = SpellingObserver(self.input_buffer)
+        self.so = SpellingObserver()
         self.so.start()
         return
 
@@ -173,7 +180,7 @@ class GameLoop:
     def speak_key(self,keyname):
         #print(keyname)
         if len(keyname) == 1:
-            self.input_buffer += keyname
+            self.so.input(keyname)
             if keyname.islower():
                 idx = ord(keyname) - 0x61
                 self.sound_alphabet[idx].play()
