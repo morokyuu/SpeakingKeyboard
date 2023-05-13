@@ -53,9 +53,8 @@ class SpellingObserver(Thread):
 
     def run(self):
         while True:
-            print("hello")
             print(self.input_buffer)
-            time.sleep(1)
+            time.sleep(0.8)
 
 class GameLoop:
     def __init__(self):
@@ -81,7 +80,6 @@ class GameLoop:
         self.input_buffer = []
         self.so = SpellingObserver(self.input_buffer)
         self.so.start()
-        #self.so = SpellingObserver(self.input_buffer)
         return
 
     def input_key(self) -> str | None:
