@@ -50,8 +50,7 @@ class State:
 
 class KeyState(Enum):
     WAIT = 0
-    START = 1
-    CONTINUE = 2
+    TYPING = 2
 
 
 class KeyEvent(Enum):
@@ -81,6 +80,7 @@ class SpellingObserver(Thread):
 
     def timerout(self):
         self.event = KeyEvent.TIMEOUT
+        print("timeout")
 
     def matching(self):
         #compare buffer and spell dictionary
@@ -101,25 +101,24 @@ class SpellingObserver(Thread):
 
             if self.state == KeyState.WAIT:
                 if self.event == KeyEvent.CHANGED:
-                    self.state = KeyState.START
-            elif self.state == KeyState.START:
+                    self.state = KeyState.TYPING
+                    self.timer = Timer(3, self.timerout)
+                    self.timer.start()
+                    print("start")
+            elif self.state == KeyState.TYPING:
                 if self.event == KeyEvent.CHANGED:
-                    self.state = KeyState.CONTINUE
+                    self.state = KeyState.TYPING
                     if self.matching():
                         self.report()
-                    else:
-                        self.timer = Timer(1,self.timerout)
-                        self.timer.start()
+                        self.input_buffer.clear()
                 elif self.event == KeyEvent.TIMEOUT:
                     self.state = KeyState.WAIT
-            elif self.state == KeyState.CONTINUE:
-                if len(self.input_buffer) > 0:
-                    print(self.input_buffer)
                     self.input_buffer.clear()
-                self.state = KeyState.WAIT
 
             print(f"state={self.state} event={self.event}")
             self.event = KeyEvent.NOTHING
+
+            time.sleep(0.8)
 
 
 class GameLoop:
@@ -204,6 +203,8 @@ class GameLoop:
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     pygame.init()
+    clock = pygame.time.Clock()
+
     flags = pygame.FULLSCREEN
     #DISPLAYSURF = pygame.display.set_mode(size=(640,480), display=0, depth=32, flags=pygame.FULLSCREEN)
     DISPLAYSURF = pygame.display.set_mode(size=(640,480), display=0, depth=32)
@@ -211,5 +212,6 @@ if __name__ == '__main__':
     g = GameLoop()
     while True:
         g.do()
+        clock.tick(20)
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
