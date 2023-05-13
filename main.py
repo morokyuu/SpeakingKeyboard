@@ -45,6 +45,17 @@ class State:
         return
 
 
+class SpellingObserver(Timer):
+    def __init__(self,input_buffer):
+        super(SpellingObserver,self).__init__(1,self.latch)
+        self.input_buffer = input_buffer
+        return
+
+    def latch(self):
+        print("hello")
+        print(self.input_buffer)
+        return
+
 class GameLoop:
     def __init__(self):
         fontObj = pygame.font.Font('freesansbold.ttf', 60)
@@ -65,6 +76,9 @@ class GameLoop:
 
         files = {'.':"dot.mp3",';':"semicolon.mp3",'/':"slash.mp3",':':"colon.mp3",'@':"at.mp3"}
         self.sound_symbol = {f:pygame.mixer.Sound("./wav/symbol/"+files[f]) for f in files.keys()}
+
+        self.input_buffer = []
+        self.so = SpellingObserver(self.input_buffer)
         return
 
     def input_key(self) -> str | None:
@@ -84,6 +98,7 @@ class GameLoop:
     def speak_key(self,keyname):
         #print(keyname)
         if len(keyname) == 1:
+            self.input_buffer += keyname
             if keyname.islower():
                 idx = ord(keyname) - 0x61
                 self.sound_alphabet[idx].play()
