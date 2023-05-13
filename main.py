@@ -18,9 +18,6 @@ BLUE = (0, 0, 123)
 WHITE = (255, 255, 255)
 
 
-def halt_all():
-    pygame.quit()
-    sys.exit()
 
 
 class FontDisplay:
@@ -53,10 +50,14 @@ class SpellingObserver(Thread):
     def __init__(self,input_buffer):
         super(SpellingObserver,self).__init__()
         self.input_buffer = input_buffer
+        self.running = True
         return
 
+    def halt(self):
+        self.running = False
+
     def run(self):
-        while True:
+        while self.running:
             print(self.input_buffer)
             time.sleep(0.8)
 
@@ -86,14 +87,19 @@ class GameLoop:
         self.so.start()
         return
 
+    def halt_all(self):
+        self.so.halt()
+        pygame.quit()
+        sys.exit()
+
     def input_key(self) -> str | None:
         keyname = None
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                halt_all()
+                self.halt_all()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    halt_all()
+                    self.halt_all()
                 else:
                     keyname = pygame.key.name(event.key)
         return keyname
