@@ -12,6 +12,8 @@ import sys
 import time
 import glob
 from threading import Thread
+from threading import Timer
+from enum import Enum
 
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 123)
@@ -46,22 +48,79 @@ class State:
         return
 
 
+class KeyState(Enum):
+    WAIT = 0
+    START = 1
+    CONTINUE = 2
+
+
+class KeyEvent(Enum):
+    NOTHING = 0
+    CHANGED = 1
+    TIMEOUT = 2
+
+
 class SpellingObserver(Thread):
+
     def __init__(self,input_buffer):
         super(SpellingObserver,self).__init__()
         self.input_buffer = input_buffer
         self.running = True
+        self.state = KeyState.WAIT
+        self.event = KeyEvent.NOTHING
         return
 
     def halt(self):
         self.running = False
 
+    def observe(self):
+        if self.curr_len > self.prev_len:
+            self.prev_len = self.curr_len
+            print(self.input_buffer)
+            self.event = KeyEvent.CHANGED
+
+    def timerout(self):
+        self.event = KeyEvent.TIMEOUT
+
+    def matching(self):
+        #compare buffer and spell dictionary
+        pass
+
+    def report(self):
+        #spell was matched and execute special effect
+        pass
     def run(self):
+        self.prev_len = 0
+        self.curr_len = 0
+        self.timer = None
+
         while self.running:
-            time.sleep(3)
-            if len(self.input_buffer) > 0:
-                print(self.input_buffer)
-                self.input_buffer.clear()
+            self.curr_len = len(self.input_buffer)
+
+            self.observe()
+
+            if self.state == KeyState.WAIT:
+                if self.event == KeyEvent.CHANGED:
+                    self.state = KeyState.START
+            elif self.state == KeyState.START:
+                if self.event == KeyEvent.CHANGED:
+                    self.state = KeyState.CONTINUE
+                    if self.matching():
+                        self.report()
+                    else:
+                        self.timer = Timer(1,self.timerout)
+                        self.timer.start()
+                elif self.event == KeyEvent.TIMEOUT:
+                    self.state = KeyState.WAIT
+            elif self.state == KeyState.CONTINUE:
+                if len(self.input_buffer) > 0:
+                    print(self.input_buffer)
+                    self.input_buffer.clear()
+                self.state = KeyState.WAIT
+
+            print(f"state={self.state} event={self.event}")
+            self.event = KeyEvent.NOTHING
+
 
 class GameLoop:
     def __init__(self):
@@ -135,10 +194,6 @@ class GameLoop:
                 pass
             else:
                 print(keyname)
-
-            if keyname is None:
-                pass
-            else:
                 self.speak_key(keyname)
                 fontd = FontDisplay(keyname)
 
