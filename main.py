@@ -77,6 +77,7 @@ class SpellingObserver(Thread):
             self.prev_len = self.curr_len
             print(self.input_buffer)
             self.event = KeyEvent.CHANGED
+            print("buffer changed")
 
     def timerout(self):
         self.event = KeyEvent.TIMEOUT
@@ -115,13 +116,18 @@ class SpellingObserver(Thread):
                     self.state = KeyState.WAIT
                     self.input_buffer.clear()
 
+
             print(f"state={self.state} event={self.event}")
             self.event = KeyEvent.NOTHING
 
-            time.sleep(0.8)
+            time.sleep(0.4)
 
 
 class GameLoop:
+    class KeySt(Enum):
+        START = 0
+        CONTINUE = 1
+
     def __init__(self):
         fontObj = pygame.font.Font('freesansbold.ttf', 60)
         self.textSurfaceObj = fontObj.render("Speaking Keyboard", True, GREEN, BLUE)
@@ -193,6 +199,10 @@ class GameLoop:
                 pass
             else:
                 print(keyname)
+
+            if keyname is None:
+                pass
+            else:
                 self.speak_key(keyname)
                 fontd = FontDisplay(keyname)
 
