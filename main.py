@@ -78,8 +78,14 @@ class GameLoop:
         self.sound_symbol = {f:pygame.mixer.Sound("./wav/symbol/"+files[f]) for f in files.keys()}
 
         self.input_buffer = []
-        self.so = SpellingObserver(self.input_buffer)
+        self.so = Timer(1,self.latch)
+        self.so.start()
+        #self.so = SpellingObserver(self.input_buffer)
         return
+
+    def latch(self):
+        print("hello")
+        print(self.input_buffer)
 
     def input_key(self) -> str | None:
         keyname = None
