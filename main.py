@@ -18,6 +18,10 @@ BLUE = (0, 0, 123)
 WHITE = (255, 255, 255)
 
 
+def halt_all():
+    pygame.quit()
+    sys.exit()
+
 
 class FontDisplay:
     def __init__(self,char="hit any key"):
@@ -86,12 +90,10 @@ class GameLoop:
         keyname = None
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+                halt_all()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    pygame.quit()
-                    sys.exit()
+                    halt_all()
                 else:
                     keyname = pygame.key.name(event.key)
         return keyname
