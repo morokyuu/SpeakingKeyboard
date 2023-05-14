@@ -1,0 +1,5 @@
+
+５０音順
+for S in K S T N H M Y R W; do for c in A I U E O; do echo $S$c; done; done
+
+

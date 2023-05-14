@@ -6,6 +6,7 @@
 from pygame.locals import *
 import pygame
 import sys
+import os
 import time
 import glob
 
@@ -48,20 +49,23 @@ class GameLoop:
         self.textRectObj = self.textSurfaceObj.get_rect()
         self.textRectObj.center = (300, 150)
 
-        self.sound_picon = pygame.mixer.Sound('決定ボタンを押す3.mp3')
-        self.sound_picon.play()
+        files = glob.glob("./wav/**/*.mp3",recursive=True)
+        print([os.path.split(f)[1][:-4] for f in files])
 
-        files = glob.glob("./wav/alphabet*.wav")
-        files = sorted(files)
-        self.sound_alphabet = [pygame.mixer.Sound(f) for f in files]
-
-        files = glob.glob("./wav/number/*.mp3")
-        files = sorted(files)
-        self.sound_number = [pygame.mixer.Sound(f) for f in files]
-
-        files = {'.':"dot.mp3",';':"semicolon.mp3",'/':"slash.mp3",':':"colon.mp3",'@':"at.mp3"}
-        self.sound_symbol = {f:pygame.mixer.Sound("./wav/symbol/"+files[f]) for f in files.keys()}
-        return
+#        self.sound_picon = pygame.mixer.Sound('決定ボタンを押す3.mp3')
+#        self.sound_picon.play()
+#
+#        files = glob.glob("./wav/alphabet*.wav")
+#        files = sorted(files)
+#        self.sound_alphabet = [pygame.mixer.Sound(f) for f in files]
+#
+#        files = glob.glob("./wav/number/*.mp3")
+#        files = sorted(files)
+#        self.sound_number = [pygame.mixer.Sound(f) for f in files]
+#
+#        files = {'.':"dot.mp3",';':"semicolon.mp3",'/':"slash.mp3",':':"colon.mp3",'@':"at.mp3"}
+#        self.sound_symbol = {f:pygame.mixer.Sound("./wav/symbol/"+files[f]) for f in files.keys()}
+#        return
 
     def input_key(self) -> str | None:
         keyname = None
