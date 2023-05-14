@@ -1,0 +1,3 @@
+a,chi
+b,ko
+c,so
