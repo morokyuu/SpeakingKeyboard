@@ -48,6 +48,13 @@ class SoundPlayer:
         names = [os.path.split(f)[1][:-4] for f in paths]
         self.mp3dict = {name:path for name,path in zip(names,paths)}
 
+        ## rename for symbols
+        self.mp3dict['@'] = "./wav/symbol/at.mp3"
+        self.mp3dict[':'] = "./wav/symbol/colon.mp3"
+        self.mp3dict['.'] = "./wav/symbol/dot.mp3"
+        self.mp3dict[';'] = "./wav/symbol/semicolon.mp3"
+        self.mp3dict['/'] = "./wav/symbol/slash.mp3"
+
     def play(self,name):
         sound = pygame.mixer.Sound(self.mp3dict[name])
         sound.play()
