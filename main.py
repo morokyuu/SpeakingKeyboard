@@ -50,7 +50,13 @@ class GameLoop:
         self.textRectObj.center = (300, 150)
 
         files = glob.glob("./wav/**/*.mp3",recursive=True)
-        print([os.path.split(f)[1][:-4] for f in files])
+        paths = [f for f in files]
+        names = [os.path.split(f)[1][:-4] for f in files]
+
+        mp3dict = {name:path for name,path in zip(names,paths)}
+
+        for m in mp3dict.keys():
+            print(f"{m}, {mp3dict[m]}")
 
 #        self.sound_picon = pygame.mixer.Sound('決定ボタンを押す3.mp3')
 #        self.sound_picon.play()
