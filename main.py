@@ -42,6 +42,16 @@ class State:
     def transition(self):
         return
 
+class KanaDict:
+    def __init__(self):
+        with open("hiragana.dat", "r") as fp:
+            self.pairs = [line.rstrip().split(' ') for line in fp.readlines()]
+        self.letter = [p[0] for p in self.pairs]
+
+    def get(self,key_name):
+        assert key_name in self.letter, "not for kana-moji key"
+        return self.pairs[key_name]
+
 class SoundPlayer:
     def __init__(self):
         paths = glob.glob("./wav/**/*.mp3",recursive=True)
@@ -55,10 +65,16 @@ class SoundPlayer:
         self.mp3dict[';'] = "./wav/symbol/semicolon.mp3"
         self.mp3dict['/'] = "./wav/symbol/slash.mp3"
 
+        ## hiragana mode
+        self.kanad = KanaDict()
+
         self.kana_mode = False
 
     def play(self,name):
-        sound = pygame.mixer.Sound(self.mp3dict[name])
+        if self.kana_mode:
+            sound = pygame.mixer.Sound(self.kanad.get(name))
+        else:
+            sound = pygame.mixer.Sound(self.mp3dict[name])
         sound.play()
 
     def change_mode(self):
@@ -88,8 +104,6 @@ class GameLoop:
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()
-                elif event.key == pygame.K_SPACE:
-                    self.sp.change_mode()
                 else:
                     keyname = pygame.key.name(event.key)
         return keyname
