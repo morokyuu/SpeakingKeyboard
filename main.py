@@ -119,15 +119,7 @@ class GameLoop:
     def speak_key(self,keyname):
         #print(keyname)
         if len(keyname) == 1:
-            if keyname.islower():
-                assert keyname in string.ascii_lowercase, "not ascii_lowercase"
-                self.sp.play(keyname)
-            elif keyname.isdigit():
-                assert keyname in string.digits, "not digits"
-                self.sp.play(keyname)
-            elif keyname in '.;:@/':
-                assert keyname in string.punctuation, "not punctuation"
-                self.sp.play(keyname)
+            self.sp.play(keyname)
         else:
             return
 
