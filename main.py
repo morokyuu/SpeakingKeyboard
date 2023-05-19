@@ -1,4 +1,5 @@
 # This is a sample Python script.
+import string
 
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
@@ -62,20 +63,6 @@ class GameLoop:
         self.sp = SoundPlayer()
         self.sp.play('picon')
 
-
-#
-#        files = glob.glob("./wav/alphabet*.wav")
-#        files = sorted(files)
-#        self.sound_alphabet = [pygame.mixer.Sound(f) for f in files]
-#
-#        files = glob.glob("./wav/number/*.mp3")
-#        files = sorted(files)
-#        self.sound_number = [pygame.mixer.Sound(f) for f in files]
-#
-#        files = {'.':"dot.mp3",';':"semicolon.mp3",'/':"slash.mp3",':':"colon.mp3",'@':"at.mp3"}
-#        self.sound_symbol = {f:pygame.mixer.Sound("./wav/symbol/"+files[f]) for f in files.keys()}
-#        return
-
     def input_key(self) -> str | None:
         keyname = None
         for event in pygame.event.get():
@@ -94,13 +81,14 @@ class GameLoop:
         #print(keyname)
         if len(keyname) == 1:
             if keyname.islower():
-                idx = ord(keyname) - 0x61
-                self.sound_alphabet[idx].play()
+                assert keyname in string.ascii_lowercase, "not ascii_lowercase"
+                self.sp.play(keyname)
             elif keyname.isdigit():
-                idx = int(keyname)
-                self.sound_number[idx].play()
+                assert keyname in string.digits, "not digits"
+                self.sp.play(keyname)
             elif keyname in '.;:@/':
-                self.sound_symbol[keyname].play()
+                assert keyname in string.punctuation, "not punctuation"
+                self.sp.play(keyname)
         else:
             return
 
