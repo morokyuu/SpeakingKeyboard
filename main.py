@@ -41,6 +41,16 @@ class State:
     def transition(self):
         return
 
+class SoundPlayer:
+    def __init__(self):
+        paths = glob.glob("./wav/**/*.mp3",recursive=True)
+        names = [os.path.split(f)[1][:-4] for f in paths]
+        self.mp3dict = {name:path for name,path in zip(names,paths)}
+
+    def play(self,name):
+        sound = pygame.mixer.Sound(self.mp3dict[name])
+        sound.play()
+
 
 class GameLoop:
     def __init__(self):
@@ -49,17 +59,10 @@ class GameLoop:
         self.textRectObj = self.textSurfaceObj.get_rect()
         self.textRectObj.center = (300, 150)
 
-        files = glob.glob("./wav/**/*.mp3",recursive=True)
-        paths = [f for f in files]
-        names = [os.path.split(f)[1][:-4] for f in files]
+        self.sp = SoundPlayer()
+        self.sp.play('picon')
 
-        mp3dict = {name:path for name,path in zip(names,paths)}
 
-        for m in mp3dict.keys():
-            print(f"{m}, {mp3dict[m]}")
-
-#        self.sound_picon = pygame.mixer.Sound('決定ボタンを押す3.mp3')
-#        self.sound_picon.play()
 #
 #        files = glob.glob("./wav/alphabet*.wav")
 #        files = sorted(files)
@@ -133,6 +136,7 @@ if __name__ == '__main__':
     #DISPLAYSURF = pygame.display.set_mode(size=(640,480), display=0, depth=32, flags=pygame.FULLSCREEN)
     DISPLAYSURF = pygame.display.set_mode(size=(640,480), display=0, depth=32)
     pygame.display.set_caption('Hit any key')
+
     g = GameLoop()
     while True:
         g.do()
