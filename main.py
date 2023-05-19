@@ -55,9 +55,17 @@ class SoundPlayer:
         self.mp3dict[';'] = "./wav/symbol/semicolon.mp3"
         self.mp3dict['/'] = "./wav/symbol/slash.mp3"
 
+        self.kana_mode = False
+
     def play(self,name):
         sound = pygame.mixer.Sound(self.mp3dict[name])
         sound.play()
+
+    def change_mode(self):
+        self.kana_mode = not self.kana_mode
+        self.play("picon")
+        print(f"change mode {self.kana_mode}")
+
 
 
 class GameLoop:
@@ -80,6 +88,8 @@ class GameLoop:
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()
+                elif event.key == pygame.K_SPACE:
+                    self.sp.change_mode()
                 else:
                     keyname = pygame.key.name(event.key)
         return keyname
@@ -113,10 +123,6 @@ class GameLoop:
                 pass
             else:
                 print(keyname)
-
-            if keyname is None:
-                pass
-            else:
                 self.speak_key(keyname)
                 fontd = FontDisplay(keyname)
 
