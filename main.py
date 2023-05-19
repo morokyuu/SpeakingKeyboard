@@ -71,6 +71,10 @@ def kana_dict():
         print(f"--{p}--")
     for p in pairs:
         kana_dict[p[0]] = mp3dict[p[1]]
+    # todo ほかにも未割当キーがあるのでKeyError(dictの例外)で落ちる
+    # fileを読み込む処理を入れたのなら、直接mp3を指定してもいいような気もする。そのほうが簡単
+    # fileの指定を変えるだけで済むから。
+    kana_dict['@'] = "./wav/effect/picon.mp3"
 
     return kana_dict
 
