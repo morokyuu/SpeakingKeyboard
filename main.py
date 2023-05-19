@@ -42,45 +42,47 @@ class State:
     def transition(self):
         return
 
-class KanaDict:
-    def __init__(self):
-        with open("hiragana.dat", "r") as fp:
-            self.pairs = [line.rstrip().split(' ') for line in fp.readlines()]
-        self.letter = [p[0] for p in self.pairs]
 
-    def get(self,key_name):
-        assert key_name in self.letter, "not for kana-moji key"
-        return self.pairs[key_name]
+def english_dict():
+    paths = glob.glob("./wav/**/*.mp3",recursive=True)
+    names = [os.path.split(f)[1][:-4] for f in paths]
+    mp3dict = {name:path for name,path in zip(names,paths)}
+
+    ## rename for symbols
+    mp3dict['@'] = "./wav/symbol/at.mp3"
+    mp3dict[':'] = "./wav/symbol/colon.mp3"
+    mp3dict['.'] = "./wav/symbol/dot.mp3"
+    mp3dict[';'] = "./wav/symbol/semicolon.mp3"
+    mp3dict['/'] = "./wav/symbol/slash.mp3"
+    return mp3dict
+
+
+def kana_dict():
+    paths = glob.glob("./wav/**/*.mp3",recursive=True)
+    names = [os.path.split(f)[1][:-4] for f in paths]
+    mp3dict = {name:path for name,path in zip(names,paths)}
+
+    with open("hiragana.dat", "r") as fp:
+        pairs = [line.rstrip().split(' ') for line in fp.readlines()]
+    letter = [p[0] for p in pairs]
+
+    kana_dict = {}
+    for p in pairs:
+        print(f"--{p}--")
+    for p in pairs:
+        kana_dict[p[0]] = mp3dict[p[1]]
+
+    return kana_dict
+
 
 class SoundPlayer:
-    def __init__(self):
-        paths = glob.glob("./wav/**/*.mp3",recursive=True)
-        names = [os.path.split(f)[1][:-4] for f in paths]
-        self.mp3dict = {name:path for name,path in zip(names,paths)}
-
-        ## rename for symbols
-        self.mp3dict['@'] = "./wav/symbol/at.mp3"
-        self.mp3dict[':'] = "./wav/symbol/colon.mp3"
-        self.mp3dict['.'] = "./wav/symbol/dot.mp3"
-        self.mp3dict[';'] = "./wav/symbol/semicolon.mp3"
-        self.mp3dict['/'] = "./wav/symbol/slash.mp3"
-
-        ## hiragana mode
-        self.kanad = KanaDict()
-
-        self.kana_mode = False
+    def __init__(self,mp3dict):
+        self.dict = mp3dict
 
     def play(self,name):
-        if self.kana_mode:
-            sound = pygame.mixer.Sound(self.kanad.get(name))
-        else:
-            sound = pygame.mixer.Sound(self.mp3dict[name])
+        sound = pygame.mixer.Sound(self.dict[name])
         sound.play()
 
-    def change_mode(self):
-        self.kana_mode = not self.kana_mode
-        self.play("picon")
-        print(f"change mode {self.kana_mode}")
 
 
 
@@ -91,8 +93,14 @@ class GameLoop:
         self.textRectObj = self.textSurfaceObj.get_rect()
         self.textRectObj.center = (300, 150)
 
-        self.sp = SoundPlayer()
-        self.sp.play('picon')
+        #self.sp = SoundPlayer(english_dict())
+        self.sp = SoundPlayer(kana_dict())
+        #self.sp.play('picon')
+
+    def change_mode(self):
+        self.kana_mode = False
+        self.kana_mode = not self.kana_mode
+        print(f"change mode {self.kana_mode}")
 
     def input_key(self) -> str | None:
         keyname = None
