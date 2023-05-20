@@ -19,7 +19,7 @@ WHITE = (255, 255, 255)
 
 
 class FontDisplay:
-    def __init__(self,char="hit any key"):
+    def __init__(self,char="hello"):
         fontObj = pygame.font.Font('freesansbold.ttf', 130)
 
         self.char = char
@@ -36,33 +36,6 @@ class FontDisplay:
         return
 
 
-class State:
-    def __init__(self):
-        return
-
-    def transition(self):
-        return
-
-class KanaDict:
-    def __init__(self):
-        with open("hiragana.dat", "r") as fp:
-            self.pairs = [line.rstrip().split(' ') for line in fp.readlines()]
-        self.letter = [p[0] for p in self.pairs]
-
-    def get(self,key_name):
-        assert key_name in self.letter, "not for kana-moji key"
-        return self.pairs[key_name]
-
-
-class SoundDict:
-    def __init__(self):
-        pass
-
-
-    def get_sound(self,keyname):
-        return
-
-
 class Mode(Enum):
     ENGLISH = 0,
     KANA = 1
@@ -70,9 +43,8 @@ class Mode(Enum):
 
 class SoundPlayer:
     def __init__(self):
-        #self.load_eng_dict()
-        self.load_kana_dict()
-        pass
+        self.load_eng_dict()
+        #self.load_kana_dict()
 
     def load_eng_dict(self):
         with open("eng_mode","r") as fp:
