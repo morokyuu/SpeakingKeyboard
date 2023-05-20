@@ -20,10 +20,8 @@ WHITE = (255, 255, 255)
 
 class FontDisplay:
     def __init__(self,char="hello"):
-        self.char = char
-
         self.fontObj = pygame.font.Font('freesansbold.ttf', 130)
-        self.charSurfaceObj = self.fontObj.render(self.char, True, GREEN, BLUE)
+        self.charSurfaceObj = self.fontObj.render(char, True, GREEN, BLUE)
         self.charRectObj = self.charSurfaceObj.get_rect()
         self.charRectObj.center = (300, 300)
 
@@ -39,7 +37,6 @@ class FontDisplay:
 
     def draw(self):
         DISPLAYSURF.blit(self.charSurfaceObj, self.charRectObj)
-        return
 
 
 class Mode(Enum):
