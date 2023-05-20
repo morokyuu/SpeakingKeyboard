@@ -52,36 +52,25 @@ class KanaDict:
         assert key_name in self.letter, "not for kana-moji key"
         return self.pairs[key_name]
 
+
 class SoundPlayer:
     def __init__(self):
-        paths = glob.glob("./wav/**/*.mp3",recursive=True)
-        names = [os.path.split(f)[1][:-4] for f in paths]
-        self.mp3dict = {name:path for name,path in zip(names,paths)}
+        with open("eng_mode","r") as fp:
+            lines = [line.rstrip() for line in fp.readlines()]
 
-        ## rename for symbols
-        self.mp3dict['@'] = "./wav/symbol/at.mp3"
-        self.mp3dict[':'] = "./wav/symbol/colon.mp3"
-        self.mp3dict['.'] = "./wav/symbol/dot.mp3"
-        self.mp3dict[';'] = "./wav/symbol/semicolon.mp3"
-        self.mp3dict['/'] = "./wav/symbol/slash.mp3"
+        self.mp3dict = {}
+        for line in lines:
+            col = line.split(' ')
+            assert len(col) == 3,"file: num of column error."
+            self.mp3dict[col[0]] = col[2]
 
-        ## hiragana mode
-        self.kanad = KanaDict()
-
-        self.kana_mode = False
+        self.mp3dict["picon"] = "./wav/effect/picon.mp3"
 
     def play(self,name):
-        if self.kana_mode:
-            sound = pygame.mixer.Sound(self.kanad.get(name))
-        else:
-            sound = pygame.mixer.Sound(self.mp3dict[name])
-        sound.play()
-
-    def change_mode(self):
-        self.kana_mode = not self.kana_mode
-        self.play("picon")
-        print(f"change mode {self.kana_mode}")
-
+        path = self.mp3dict[name]
+        if len(path) > 1:
+            sound = pygame.mixer.Sound(path)
+            sound.play()
 
 
 class GameLoop:
