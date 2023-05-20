@@ -12,6 +12,9 @@ if __name__ == '__main__':
     screen = pygame.display.set_mode(size=(640,480), display=0, depth=32)
     pygame.display.set_caption('Hit any key')
 
+    for n,i in enumerate([1,3,4]):
+        print(f"{n} {i}")
+
     while True:
         screen.fill((0,0,0))
         test()
@@ -22,3 +25,4 @@ if __name__ == '__main__':
                 pygame.quit()
                 sys.exit()
     pygame.quit()
+

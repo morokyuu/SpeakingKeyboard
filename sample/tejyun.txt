@@ -8,3 +8,7 @@ python3 -c '''import string; chars = string.printable.split('\ ')[0]; [print(f"{
 
 
 
+打ち込んだひらがなが、何番目に該当するかを書き出す
+python3 -c 'text = "あいうえおかきくけおさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよわをん"; [print(f"{n} {c}") for n,c in enumerate(text)];'
+
+
