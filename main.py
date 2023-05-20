@@ -20,20 +20,23 @@ WHITE = (255, 255, 255)
 
 class FontDisplay:
     def __init__(self,char="hello"):
-        fontObj = pygame.font.Font('freesansbold.ttf', 130)
+        self.fontObj = pygame.font.Font('freesansbold.ttf', 130)
+        self.charSurfaceObj = self.fontObj.render(char, True, GREEN, BLUE)
+        self.charRectObj = self.charSurfaceObj.get_rect()
+        self.charRectObj.center = (300, 300)
 
+    def change(self,char):
         self.char = char
         if len(self.char)==1:
             if self.char.islower():
                 self.char = self.char.upper()
             self.char = " " + self.char + " "
-        self.charSurfaceObj = fontObj.render(self.char, True, GREEN, BLUE)
+        self.charSurfaceObj = self.fontObj.render(self.char, True, GREEN, BLUE)
         self.charRectObj = self.charSurfaceObj.get_rect()
         self.charRectObj.center = (300, 300)
 
     def draw(self):
         DISPLAYSURF.blit(self.charSurfaceObj, self.charRectObj)
-        return
 
 
 class Mode(Enum):
@@ -102,6 +105,8 @@ class GameLoop:
         self.sp = SoundPlayer()
         self.sp.play_effect_picon()
 
+        self.fontd = FontDisplay()
+
     def input_key(self) -> str | None:
         keyname = None
         for event in pygame.event.get():
@@ -117,7 +122,6 @@ class GameLoop:
         return keyname
 
     def do(self):
-        fontd = FontDisplay()
         while True:
             DISPLAYSURF.fill(WHITE)
             pygame.draw.polygon(DISPLAYSURF, GREEN,
@@ -131,9 +135,9 @@ class GameLoop:
             else:
                 print(keyname)
                 self.sp.play(keyname)
-                fontd = FontDisplay(keyname)
+                self.fontd.change(keyname)
 
-            fontd.draw()
+            self.fontd.draw()
             pygame.display.update()
 
 
