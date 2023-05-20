@@ -83,8 +83,6 @@ class SoundPlayer:
             assert len(col) == 3,"file: num of column error."
             self.mp3dict[col[0]] = col[2]
 
-        self.mp3dict["picon"] = "./wav/effect/picon.mp3"
-
     def load_kana_dict(self):
         with open("kana_mode","r") as fp:
             lines = [line.rstrip() for line in fp.readlines()]
@@ -95,8 +93,6 @@ class SoundPlayer:
             assert len(col) == 3,"file: num of column error."
             self.mp3dict[col[0]] = col[2]
 
-        self.mp3dict["picon"] = "./wav/effect/picon.mp3"
-
     def change_mode(self,mode):
         if mode == Mode.ENGLISH:
             self.load_eng_dict()
@@ -104,11 +100,23 @@ class SoundPlayer:
             self.load_kana_dict()
         pass
 
+    def play_effect_kotsu(self):
+        sound = pygame.mixer.Sound("./wav/effect/kotsu.mp3")
+        sound.play()
+
+    def play_effect_picon(self):
+        sound = pygame.mixer.Sound("./wav/effect/picon.mp3")
+        sound.play()
+
     def play(self,name):
-        path = self.mp3dict[name]
-        if len(path) > 1:
+        path = ""
+        try:
+            path = self.mp3dict[name]
             sound = pygame.mixer.Sound(path)
             sound.play()
+        except:
+            self.play_effect_kotsu()
+
 
 
 class GameLoop:
@@ -119,7 +127,7 @@ class GameLoop:
         self.textRectObj.center = (300, 150)
 
         self.sp = SoundPlayer()
-        self.sp.play('picon')
+        self.sp.play_effect_picon()
 
     def input_key(self) -> str | None:
         keyname = None
@@ -135,21 +143,6 @@ class GameLoop:
                     keyname = pygame.key.name(event.key)
         return keyname
 
-    def speak_key(self,keyname):
-        #print(keyname)
-        if len(keyname) == 1:
-            if keyname.islower():
-                assert keyname in string.ascii_lowercase, "not ascii_lowercase"
-                self.sp.play(keyname)
-            elif keyname.isdigit():
-                assert keyname in string.digits, "not digits"
-                self.sp.play(keyname)
-            elif keyname in '.;:@/':
-                assert keyname in string.punctuation, "not punctuation"
-                self.sp.play(keyname)
-        else:
-            return
-
     def do(self):
         fontd = FontDisplay()
         while True:
@@ -164,7 +157,7 @@ class GameLoop:
                 pass
             else:
                 print(keyname)
-                self.speak_key(keyname)
+                self.sp.play(keyname)
                 fontd = FontDisplay(keyname)
 
             fontd.draw()
