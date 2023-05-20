@@ -5,7 +5,7 @@ from PIL import ImageDraw
 from PIL import ImageFont
 
 CHIPSIZE=70
-text = "あいうえおかきくけおさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよわをん"
+text = "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよわをん"
 print(len(text))
 
 img = Image.new("RGBA",(CHIPSIZE,CHIPSIZE*len(text)),(0,0,123,255))
@@ -20,5 +20,5 @@ def drawtext(char,y):
 for i in range(len(text)):
     drawtext(text[i],i)
 
-img.save("kana_font.png")
+img.save("../font/kana_font.png")
 img.show()

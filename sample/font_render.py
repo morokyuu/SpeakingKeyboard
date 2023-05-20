@@ -7,13 +7,16 @@ def test():
     for i in range(5):
         screen.blit(kana,(30+i*80,70),pygame.Rect(0,i*70+8,70,70))
 
+    for i in range(5):
+        screen.blit(kana,(30+i*80,145),pygame.Rect(0,(i+5)*70+8,70,70))
+
+    for i in range(5):
+        screen.blit(kana,(30+i*80,220),pygame.Rect(0,(i+10)*70+8,70,70))
+
 if __name__ == '__main__':
     pygame.init()
     screen = pygame.display.set_mode(size=(640,480), display=0, depth=32)
     pygame.display.set_caption('Hit any key')
-
-    for n,i in enumerate([1,3,4]):
-        print(f"{n} {i}")
 
     while True:
         screen.fill((0,0,0))
