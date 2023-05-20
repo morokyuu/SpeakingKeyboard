@@ -70,7 +70,8 @@ class Mode(Enum):
 
 class SoundPlayer:
     def __init__(self):
-        self.load_eng_dict()
+        #self.load_eng_dict()
+        self.load_kana_dict()
         pass
 
     def load_eng_dict(self):
