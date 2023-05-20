@@ -5,7 +5,7 @@ from PIL import ImageDraw
 from PIL import ImageFont
 
 CHIPSIZE=70
-text = "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよわをん"
+text = "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん"
 print(len(text))
 
 img = Image.new("RGBA",(CHIPSIZE,CHIPSIZE*len(text)),(0,0,123,255))
