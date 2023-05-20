@@ -141,8 +141,8 @@ class GameLoop:
 if __name__ == '__main__':
     pygame.init()
     flags = pygame.FULLSCREEN
-    #DISPLAYSURF = pygame.display.set_mode(size=(640,480), display=0, depth=32, flags=pygame.FULLSCREEN)
-    DISPLAYSURF = pygame.display.set_mode(size=(640,480), display=0, depth=32)
+    DISPLAYSURF = pygame.display.set_mode(size=(640,480), display=0, depth=32, flags=pygame.FULLSCREEN)
+    #DISPLAYSURF = pygame.display.set_mode(size=(640,480), display=0, depth=32)
     pygame.display.set_caption('Hit any key')
 
     g = GameLoop()
