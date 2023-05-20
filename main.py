@@ -10,6 +10,7 @@ import sys
 import os
 import time
 import glob
+from enum import Enum
 
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 123)
@@ -53,8 +54,26 @@ class KanaDict:
         return self.pairs[key_name]
 
 
+class SoundDict:
+    def __init__(self):
+        pass
+
+
+    def get_sound(self,keyname):
+        return
+
+
+class Mode(Enum):
+    ENGLISH = 0,
+    KANA = 1
+
+
 class SoundPlayer:
     def __init__(self):
+        self.load_eng_dict()
+        pass
+
+    def load_eng_dict(self):
         with open("eng_mode","r") as fp:
             lines = [line.rstrip() for line in fp.readlines()]
 
@@ -65,6 +84,25 @@ class SoundPlayer:
             self.mp3dict[col[0]] = col[2]
 
         self.mp3dict["picon"] = "./wav/effect/picon.mp3"
+
+    def load_kana_dict(self):
+        with open("kana_mode","r") as fp:
+            lines = [line.rstrip() for line in fp.readlines()]
+
+        self.mp3dict = {}
+        for line in lines:
+            col = line.split(' ')
+            assert len(col) == 3,"file: num of column error."
+            self.mp3dict[col[0]] = col[2]
+
+        self.mp3dict["picon"] = "./wav/effect/picon.mp3"
+
+    def change_mode(self,mode):
+        if mode == Mode.ENGLISH:
+            self.load_eng_dict()
+        elif mode == Mode.KANA:
+            self.load_kana_dict()
+        pass
 
     def play(self,name):
         path = self.mp3dict[name]
