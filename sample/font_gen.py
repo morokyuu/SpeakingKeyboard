@@ -4,19 +4,22 @@ from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 
-#text = "あ"
-text = "あいうえお"
+CHIPSIZE=70
+text = "あいうえおかきくけおさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよわをん"
+print(len(text))
 
-img = Image.new("RGBA",(70,350),(100,100,100,100))
+img = Image.new("RGBA",(CHIPSIZE,CHIPSIZE*len(text)),(100,100,100,100))
 draw = ImageDraw.Draw(img)
 font = ImageFont.truetype("meiryo.ttc", 64)
 
-chWidth, chHight = draw.textsize(text[0], font=font)
-width, hight = img.size
-textColor = (255, 0, 0, 255)
-print(img.size)
-print(text[0])
-print(f"width={chWidth},hight={chHight}")
-draw.text((0,0), text[0], textColor, font=font)
+def drawtext(char,y):
+    chWidth, chHight = draw.textsize(char, font=font)
+    color = (255, 0, 0, 255)
+    #print(text[0])
+    #print(f"width={chWidth},hight={chHight}")
+    draw.text((0,y*CHIPSIZE), char, color, font=font)
+
+for i in range(len(text)):
+    drawtext(text[i],i)
 
 img.show()
