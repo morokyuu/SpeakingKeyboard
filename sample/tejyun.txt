@@ -3,3 +3,8 @@
 for S in K S T N H M Y R W; do for c in A I U E O; do echo $S$c; done; done
 
 
+スペース以降の文字を省略してprintableの文字を１行ずつ書き出す。２列目はasciiのhex。
+python3 -c '''import string; chars = string.printable.split('\ ')[0]; [print(f"{c} {hex(ord(c))}") for c in chars];'''
+
+
+
