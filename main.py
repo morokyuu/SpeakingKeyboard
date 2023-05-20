@@ -1,4 +1,5 @@
 # This is a sample Python script.
+import string
 
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
@@ -6,8 +7,10 @@
 from pygame.locals import *
 import pygame
 import sys
+import os
 import time
 import glob
+from enum import Enum
 
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 123)
@@ -40,6 +43,82 @@ class State:
     def transition(self):
         return
 
+class KanaDict:
+    def __init__(self):
+        with open("hiragana.dat", "r") as fp:
+            self.pairs = [line.rstrip().split(' ') for line in fp.readlines()]
+        self.letter = [p[0] for p in self.pairs]
+
+    def get(self,key_name):
+        assert key_name in self.letter, "not for kana-moji key"
+        return self.pairs[key_name]
+
+
+class SoundDict:
+    def __init__(self):
+        pass
+
+
+    def get_sound(self,keyname):
+        return
+
+
+class Mode(Enum):
+    ENGLISH = 0,
+    KANA = 1
+
+
+class SoundPlayer:
+    def __init__(self):
+        #self.load_eng_dict()
+        self.load_kana_dict()
+        pass
+
+    def load_eng_dict(self):
+        with open("eng_mode","r") as fp:
+            lines = [line.rstrip() for line in fp.readlines()]
+
+        self.mp3dict = {}
+        for line in lines:
+            col = line.split(' ')
+            assert len(col) == 3,"file: num of column error."
+            self.mp3dict[col[0]] = col[2]
+
+    def load_kana_dict(self):
+        with open("kana_mode","r") as fp:
+            lines = [line.rstrip() for line in fp.readlines()]
+
+        self.mp3dict = {}
+        for line in lines:
+            col = line.split(' ')
+            assert len(col) == 3,"file: num of column error."
+            self.mp3dict[col[0]] = col[2]
+
+    def change_mode(self,mode):
+        if mode == Mode.ENGLISH:
+            self.load_eng_dict()
+        elif mode == Mode.KANA:
+            self.load_kana_dict()
+        pass
+
+    def play_effect_kotsu(self):
+        sound = pygame.mixer.Sound("./wav/effect/kotsu.mp3")
+        sound.play()
+
+    def play_effect_picon(self):
+        sound = pygame.mixer.Sound("./wav/effect/picon.mp3")
+        sound.play()
+
+    def play(self,name):
+        path = ""
+        try:
+            path = self.mp3dict[name]
+            sound = pygame.mixer.Sound(path)
+            sound.play()
+        except:
+            self.play_effect_kotsu()
+
+
 
 class GameLoop:
     def __init__(self):
@@ -48,20 +127,8 @@ class GameLoop:
         self.textRectObj = self.textSurfaceObj.get_rect()
         self.textRectObj.center = (300, 150)
 
-        self.sound_picon = pygame.mixer.Sound('決定ボタンを押す3.mp3')
-        self.sound_picon.play()
-
-        files = glob.glob("./wav/alphabet*.wav")
-        files = sorted(files)
-        self.sound_alphabet = [pygame.mixer.Sound(f) for f in files]
-
-        files = glob.glob("./wav/number/*.mp3")
-        files = sorted(files)
-        self.sound_number = [pygame.mixer.Sound(f) for f in files]
-
-        files = {'.':"dot.mp3",';':"semicolon.mp3",'/':"slash.mp3",':':"colon.mp3",'@':"at.mp3"}
-        self.sound_symbol = {f:pygame.mixer.Sound("./wav/symbol/"+files[f]) for f in files.keys()}
-        return
+        self.sp = SoundPlayer()
+        self.sp.play_effect_picon()
 
     def input_key(self) -> str | None:
         keyname = None
@@ -77,20 +144,6 @@ class GameLoop:
                     keyname = pygame.key.name(event.key)
         return keyname
 
-    def speak_key(self,keyname):
-        #print(keyname)
-        if len(keyname) == 1:
-            if keyname.islower():
-                idx = ord(keyname) - 0x61
-                self.sound_alphabet[idx].play()
-            elif keyname.isdigit():
-                idx = int(keyname)
-                self.sound_number[idx].play()
-            elif keyname in '.;:@/':
-                self.sound_symbol[keyname].play()
-        else:
-            return
-
     def do(self):
         fontd = FontDisplay()
         while True:
@@ -105,11 +158,7 @@ class GameLoop:
                 pass
             else:
                 print(keyname)
-
-            if keyname is None:
-                pass
-            else:
-                self.speak_key(keyname)
+                self.sp.play(keyname)
                 fontd = FontDisplay(keyname)
 
             fontd.draw()
@@ -123,6 +172,7 @@ if __name__ == '__main__':
     #DISPLAYSURF = pygame.display.set_mode(size=(640,480), display=0, depth=32, flags=pygame.FULLSCREEN)
     DISPLAYSURF = pygame.display.set_mode(size=(640,480), display=0, depth=32)
     pygame.display.set_caption('Hit any key')
+
     g = GameLoop()
     while True:
         g.do()
