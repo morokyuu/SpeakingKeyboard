@@ -4,9 +4,8 @@ import sys
 
 def test():
     kana = pygame.image.load("../font/kana_font.png").convert_alpha()
-    pygame.draw.circle(screen,(0,0,100),(100,100),50)
-    screen.blit(kana,pygame.Rect(0,0,70,70))
-    pass
+    for i in range(5):
+        screen.blit(kana,(30+i*80,70),pygame.Rect(0,i*70+8,70,70))
 
 if __name__ == '__main__':
     pygame.init()
