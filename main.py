@@ -49,13 +49,13 @@ class KanaFont:
         self.kana_num = 0
 
     def change(self,char):
-        # len of char of RO-key is zero.
         #print(f"{char} {type(char)} {len(char)}")
         if len(char) == 1:
             try:
                 self.kana_num = int(self.num_dict[char])
             except:
                 self.kana_num = -1
+        # len of char of RO-key is zero.
         elif len(char) == 0:
             self.kana_num = int(self.num_dict['\\'])
 
@@ -132,7 +132,13 @@ class SoundPlayer:
     def play(self,name):
         path = ""
         try:
-            path = self.mp3dict[name]
+            # len of char of RO-key is zero.
+            if len(name) == 0:
+                path = self.mp3dict['\\']
+            elif len(name) == 1 and name == '\\':
+                self.play_effect_kotsu()
+            else:
+                path = self.mp3dict[name]
             sound = pygame.mixer.Sound(path)
             sound.play()
         except:
