@@ -52,6 +52,9 @@ class KanaFont:
         #print(f"{char} {type(char)} {len(char)}")
         if len(char) == 1:
             try:
+                if char == '\\':
+                    self.play_effect_kotsu()
+                    self.kana_num = 0
                 self.kana_num = int(self.num_dict[char])
             except:
                 self.kana_num = -1
