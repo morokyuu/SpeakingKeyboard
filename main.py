@@ -16,27 +16,43 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 123)
 WHITE = (255, 255, 255)
 
-
-
-class FontDisplay:
+class AlphabetFont:
     def __init__(self,char="hello"):
         self.fontObj = pygame.font.Font('freesansbold.ttf', 130)
         self.charSurfaceObj = self.fontObj.render(char, True, GREEN, BLUE)
         self.charRectObj = self.charSurfaceObj.get_rect()
         self.charRectObj.center = (300, 300)
+        pass
 
-    def change(self,char):
-        self.char = char
-        if len(self.char)==1:
+    def change(self,char,mode):
+        if len(self.char) == 1:
             if self.char.islower():
                 self.char = self.char.upper()
             self.char = " " + self.char + " "
+
         self.charSurfaceObj = self.fontObj.render(self.char, True, GREEN, BLUE)
         self.charRectObj = self.charSurfaceObj.get_rect()
         self.charRectObj.center = (300, 300)
 
-    def draw(self):
+    def blit(self):
         DISPLAYSURF.blit(self.charSurfaceObj, self.charRectObj)
+
+
+class FontDisplay:
+    def __init__(self):
+        pass
+
+    def change(self,char,mode):
+        self.font_gen = AlphabetFont()
+        self.char = char
+
+        if mode == Mode.ENGLISH:
+            pass
+        elif mode == Mode.KANA:
+            pass
+
+    def draw(self):
+        self.font_gen.blit()
 
 
 class Mode(Enum):
@@ -66,10 +82,10 @@ class SoundPlayer:
         self.mp3dict = {}
         for line in lines:
             col = line.split(' ')
-            assert len(col) == 3,"file: num of column error."
+            assert len(col) == 4,"file: num of column error."
             self.mp3dict[col[0]] = col[2]
 
-    def change_mode(self,mode):
+    def set_mode(self,mode):
         if mode == Mode.ENGLISH:
             self.load_eng_dict()
         elif mode == Mode.KANA:
@@ -106,6 +122,7 @@ class GameLoop:
         self.sp.play_effect_picon()
 
         self.fontd = FontDisplay()
+        self.mode = Mode.ENGLISH
 
     def input_key(self) -> str | None:
         keyname = None
@@ -121,6 +138,13 @@ class GameLoop:
                     keyname = pygame.key.name(event.key)
         return keyname
 
+    def change_mode(self):
+        if self.mode == Mode.ENGLISH:
+            self.mode = Mode.KANA
+        elif self.mode == Mode.KANA:
+            self.mode = Mode.ENGLISH
+        self.sp.set_mode(self.mode)
+
     def do(self):
         while True:
             DISPLAYSURF.fill(WHITE)
@@ -133,9 +157,13 @@ class GameLoop:
             if keyname is None:
                 pass
             else:
-                print(keyname)
-                self.sp.play(keyname)
-                self.fontd.change(keyname)
+                if keyname == 'space':
+                    print("mode change")
+                    self.change_mode()
+                else:
+                    print(keyname)
+                    self.sp.play(keyname)
+                    self.fontd.change(keyname,self.mode)
 
             self.fontd.draw()
             pygame.display.update()
