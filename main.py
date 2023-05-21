@@ -22,15 +22,14 @@ class AlphabetFont:
         self.charSurfaceObj = self.fontObj.render(char, True, GREEN, BLUE)
         self.charRectObj = self.charSurfaceObj.get_rect()
         self.charRectObj.center = (300, 300)
-        pass
 
-    def change(self,char,mode):
-        if len(self.char) == 1:
-            if self.char.islower():
-                self.char = self.char.upper()
-            self.char = " " + self.char + " "
+    def change(self,char):
+        if len(char) == 1:
+            if char.islower():
+                char = char.upper()
+            char = " " + char + " "
 
-        self.charSurfaceObj = self.fontObj.render(self.char, True, GREEN, BLUE)
+        self.charSurfaceObj = self.fontObj.render(char, True, GREEN, BLUE)
         self.charRectObj = self.charSurfaceObj.get_rect()
         self.charRectObj.center = (300, 300)
 
@@ -38,18 +37,26 @@ class AlphabetFont:
         DISPLAYSURF.blit(self.charSurfaceObj, self.charRectObj)
 
 
+class KanaFont:
+    pass
+
+
 class FontDisplay:
     def __init__(self):
-        pass
+        self.mode = Mode.ENGLISH
+        self.font_gen = AlphabetFont()
 
     def change(self,char,mode):
-        self.font_gen = AlphabetFont()
         self.char = char
 
-        if mode == Mode.ENGLISH:
+        if self.mode == mode:
             pass
-        elif mode == Mode.KANA:
-            pass
+        else:
+            if self.mode == Mode.ENGLISH:
+                self.font_gen = AlphabetFont()
+            elif self.mode == Mode.KANA:
+                self.font_gen = KanaFont()
+        self.font_gen.change(char)
 
     def draw(self):
         self.font_gen.blit()
