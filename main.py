@@ -44,14 +44,33 @@ class KanaFont:
         self.charRectObj = self.charSurfaceObj.get_rect()
         self.charRectObj.center = (300, 300)
 
+        self.kana_img = pygame.image.load("./font/kana_font.png").convert_alpha()
+        self.kana_dict,self.num_dict = load_kana_dict()
+        self.kana_num = 0
+
     def change(self,char):
+        #print(f"{char} {type(char)} {len(char)}")
         if len(char) == 1:
-            if char.islower():
-                pass
+            try:
+                if char == '\\':
+                    play_effect_kotsu()
+                    self.kana_num = -1
+                else:
+                    self.kana_num = int(self.num_dict[char])
+            except:
+                self.kana_num = -1
+        elif len(char) > 1:
+            play_effect_kotsu()
+            self.kana_num = -1
+        # len of char of RO-key is zero.
+        elif len(char) == 0:
+            self.kana_num = int(self.num_dict['\\'])
 
     def blit(self):
-        return
-        DISPLAYSURF.blit(self.charSurfaceObj, self.charRectObj)
+        if self.kana_num < 0:
+            pass
+        else:
+            DISPLAYSURF.blit(self.kana_img,(300,300),pygame.Rect(0,int(self.kana_num)*70,70,70))
 
 
 class FontDisplay:
@@ -61,14 +80,12 @@ class FontDisplay:
 
     def change(self,char,mode):
         self.char = char
+        self.mode = mode
 
-        if self.mode == mode:
-            pass
-        else:
-            if self.mode == Mode.ENGLISH:
-                self.font_gen = AlphabetFont()
-            elif self.mode == Mode.KANA:
-                self.font_gen = KanaFont()
+        if self.mode == Mode.ENGLISH:
+            self.font_gen = AlphabetFont()
+        elif self.mode == Mode.KANA:
+            self.font_gen = KanaFont()
         self.font_gen.change(char)
 
     def draw(self):
@@ -80,54 +97,64 @@ class Mode(Enum):
     KANA = 1
 
 
+def load_eng_dict():
+    with open("eng_mode","r") as fp:
+        lines = [line.rstrip() for line in fp.readlines()]
+    char_dict = {}
+    for line in lines:
+        col = line.split(' ')
+        assert len(col) == 3,"file: num of column error."
+        char_dict[col[0]] = col[2]
+    return char_dict
+
+def load_kana_dict():
+    with open("kana_mode","r") as fp:
+        lines = [line.rstrip() for line in fp.readlines()]
+    char_dict = {}
+    num_dict = {}
+    for line in lines:
+        col = line.split(' ')
+        assert len(col) == 4,"file: num of column error."
+        char_dict[col[0]] = col[2]
+        num_dict[col[0]] = col[3]
+    return char_dict,num_dict
+
+
+def play_effect_kotsu():
+    sound = pygame.mixer.Sound("./wav/effect/kotsu.mp3")
+    sound.play()
+
+def play_effect_picon():
+    sound = pygame.mixer.Sound("./wav/effect/picon.mp3")
+    sound.play()
+
 class SoundPlayer:
     def __init__(self):
-        self.load_eng_dict()
-        #self.load_kana_dict()
-
-    def load_eng_dict(self):
-        with open("eng_mode","r") as fp:
-            lines = [line.rstrip() for line in fp.readlines()]
-
-        self.mp3dict = {}
-        for line in lines:
-            col = line.split(' ')
-            assert len(col) == 3,"file: num of column error."
-            self.mp3dict[col[0]] = col[2]
-
-    def load_kana_dict(self):
-        with open("kana_mode","r") as fp:
-            lines = [line.rstrip() for line in fp.readlines()]
-
-        self.mp3dict = {}
-        for line in lines:
-            col = line.split(' ')
-            assert len(col) == 4,"file: num of column error."
-            self.mp3dict[col[0]] = col[2]
+        self.mp3dict = load_eng_dict()
+        #load_kana_dict()
 
     def set_mode(self,mode):
         if mode == Mode.ENGLISH:
-            self.load_eng_dict()
+            self.mp3dict = load_eng_dict()
         elif mode == Mode.KANA:
-            self.load_kana_dict()
+            self.mp3dict,_ = load_kana_dict()
         pass
 
-    def play_effect_kotsu(self):
-        sound = pygame.mixer.Sound("./wav/effect/kotsu.mp3")
-        sound.play()
-
-    def play_effect_picon(self):
-        sound = pygame.mixer.Sound("./wav/effect/picon.mp3")
-        sound.play()
 
     def play(self,name):
         path = ""
         try:
-            path = self.mp3dict[name]
+            # len of char of RO-key is zero.
+            if len(name) == 0:
+                path = self.mp3dict['\\']
+            elif len(name) == 1 and name == '\\':
+                play_effect_kotsu()
+            else:
+                path = self.mp3dict[name]
             sound = pygame.mixer.Sound(path)
             sound.play()
         except:
-            self.play_effect_kotsu()
+            play_effect_kotsu()
 
 
 
@@ -139,7 +166,7 @@ class GameLoop:
         self.textRectObj.center = (300, 150)
 
         self.sp = SoundPlayer()
-        self.sp.play_effect_picon()
+        play_effect_picon()
 
         self.fontd = FontDisplay()
         self.mode = Mode.ENGLISH
