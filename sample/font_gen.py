@@ -4,17 +4,21 @@ from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 
-text = "あ"
-img = Image.new("RGBA",(200,200),(100,100,100,100))
-draw = ImageDraw.Draw(img)                 # 描画オブジェクトを生成
+CHIPSIZE=70
+text = "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん"
+print(len(text))
 
+img = Image.new("RGBA",(CHIPSIZE,CHIPSIZE*len(text)),(0,0,123,255))
+draw = ImageDraw.Draw(img)
 font = ImageFont.truetype("meiryo.ttc", 64)
 
-textWidth, textHight = draw.textsize(text, font=font)
-whidth, hight = img.size
-textColor = (255, 0, 0, 255)
-t_X = (whidth - textWidth) // 2
-t_Y = (hight - textHight) // 2
-draw.text((t_X, t_Y), text, textColor, font=font)
+def drawtext(char,y):
+    chWidth, chHight = draw.textsize(char, font=font)
+    color = (0, 255, 0, 255)
+    draw.text((0,y*CHIPSIZE), char, color, font=font)
 
+for i in range(len(text)):
+    drawtext(text[i],i)
+
+img.save("../font/kana_font.png")
 img.show()
