@@ -49,14 +49,18 @@ class KanaFont:
         self.kana_num = 0
 
     def change(self,char):
+        # len of char of RO-key is zero.
+        #print(f"{char} {type(char)} {len(char)}")
         if len(char) == 1:
             try:
                 self.kana_num = int(self.num_dict[char])
             except:
                 self.kana_num = -1
+        elif len(char) == 0:
+            self.kana_num = int(self.num_dict['\\'])
 
     def blit(self):
-        DISPLAYSURF.blit(self.kana_img,(300,300),pygame.Rect(0,int(self.kana_num)*70+8,70,70))
+        DISPLAYSURF.blit(self.kana_img,(300,300),pygame.Rect(0,int(self.kana_num)*70,70,70))
 
 
 class FontDisplay:

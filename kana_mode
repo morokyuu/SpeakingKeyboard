@@ -42,3 +42,4 @@ z 0x7a ./wav/hiragana/TU.mp3 17
 ; 0x3b ./wav/hiragana/RE.mp3 41
 ] 0x5d ./wav/hiragana/MU.mp3 32
 ^ 0x5e ./wav/hiragana/HE.mp3 28
+\ 0x00 ./wav/hiragana/RO.mp3 42
