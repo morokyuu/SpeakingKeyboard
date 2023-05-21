@@ -38,7 +38,20 @@ class AlphabetFont:
 
 
 class KanaFont:
-    pass
+    def __init__(self,char="kana mode"):
+        self.fontObj = pygame.font.Font('freesansbold.ttf', 130)
+        self.charSurfaceObj = self.fontObj.render(char, True, GREEN, BLUE)
+        self.charRectObj = self.charSurfaceObj.get_rect()
+        self.charRectObj.center = (300, 300)
+
+    def change(self,char):
+        if len(char) == 1:
+            if char.islower():
+                pass
+
+    def blit(self):
+        return
+        DISPLAYSURF.blit(self.charSurfaceObj, self.charRectObj)
 
 
 class FontDisplay:
