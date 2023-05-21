@@ -12,3 +12,7 @@ python3 -c '''import string; chars = string.printable.split('\ ')[0]; [print(f"{
 python3 -c 'text = "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん"; [print(f"{n} {c}") for n,c in enumerate(text)];'
 
 
+3列目でソート
+cat kana_number.txt | sort -t' ' -k3
+
+
