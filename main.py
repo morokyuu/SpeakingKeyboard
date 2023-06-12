@@ -163,6 +163,9 @@ class SpellingObserver:
     def __init__(self):
         self.queue = []
         self.spell = {"abc","hello","pig","money","book"}
+        #self.kana_spell = [["na","su"],["a","sa","ga","o"]]
+        self.kana_spell = ["nasu","asagao","sixyuxtuhamarutu"]
+
 
     def _check(self,q):
         for sp in self.spell:
@@ -201,7 +204,7 @@ class JpDecoder:
                      '\\': "ro", }
 
     def _exchange(self,keyname,shift):
-        self.hatsuon = {'@':"dakuten",'z':"xtu",'7':"xya",'8':"xyu",'9':"xyo"}
+        self.hatsuon = {'[':"maru",'@':"dakuten",'z':"xtu",'7':"xya",'8':"xyu",'9':"xyo"}
         if not "shift" in keyname and shift == True:
             try:
                 val = self.hatsuon[keyname]
@@ -292,7 +295,6 @@ class GameLoop:
                     self.change_mode()
                 else:
                     key_obj = self.key_decoder.do(keyname, shift)
-                    print(key_obj.raw)
 
                     self.sp.play(keyname)
                     self.fontd.change(keyname,self.mode)
