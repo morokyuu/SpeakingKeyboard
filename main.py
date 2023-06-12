@@ -176,19 +176,6 @@ class JpMode:
                      ',': "ne", '-': "ho", '.': "ru", '/': "me", ':': "ke", ';': "re", ']': "mu", '^': "he",
                      '\\': "ro", }
 
-class EngMode:
-    def __init__(self):
-        pass
-class KeyDecoder:
-    def __init__(self):
-        pass
-
-    def input(self,keyname,mode,shift_key=False):
-        self.keyname = keyname
-        self.mode = mode
-        self.shift_key = shift_key
-
-
     def kanaMode(self):
         self.hatsuon = {'z':"xtu",'7':"xya",'8':"xyu",'9':"xyo"}
         if self.shift_key == True:
@@ -199,6 +186,20 @@ class KeyDecoder:
                 val = ""
         else:
             val = self.kana[self.shift_key]
+
+class EngMode:
+    def __init__(self):
+        pass
+
+
+class KeyDecoder:
+    def __init__(self,mode):
+        self.mode = mode
+
+    def do(self,keyname,shift=False):
+        return self.mode.key_input(keyname,shift)
+
+
 
 
 class GameLoop:
@@ -220,20 +221,20 @@ class GameLoop:
         pygame.quit()
         sys.exit()
 
-    def input_key(self) -> str | None:
+    def input_key(self):
         keyname = None
+        shift = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self._halt()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self._halt()
-                elif event.key == pygame.K_2 and pygame.key.get_mods() & pygame.KMOD_SHIFT:
-                    self.key_decoder.input(keyname, self.mode, True)
                 else:
+                    if pygame.key.get_mods() & pygame.KMOD_SHIFT:
+                        shift = True
                     keyname = pygame.key.name(event.key)
-                    self.key_decoder.input(keyname,self.mode)
-        return keyname
+        return keyname,shift
 
     def change_mode(self):
         if self.mode == Mode.ENGLISH:
@@ -251,8 +252,11 @@ class GameLoop:
             DISPLAYSURF.blit(self.textSurfaceObj, self.textRectObj)
 
 
+            jp_mode = JpMode()
 
-            keyname = self.input_key()
+            keyname,shift = self.input_key()
+            key_obj = self.key_decoder.do(keyname, jp_mode, shift)
+
             if keyname is None:
                 pass
             else:
