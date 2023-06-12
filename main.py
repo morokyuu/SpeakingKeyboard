@@ -180,20 +180,22 @@ class JpDecoder:
                      ',': "ne", '-': "ho", '.': "ru", '/': "me", ':': "ke", ';': "re", ']': "mu", '^': "he",
                      '\\': "ro", }
 
-    def sound(self,keyname,shift):
-        self.hatsuon = {'z':"xtu",'7':"xya",'8':"xyu",'9':"xyo"}
-        if shift == True:
+    def _exchange(self,keyname,shift):
+        self.hatsuon = {'@':"dakuten",'z':"xtu",'7':"xya",'8':"xyu",'9':"xyo"}
+        if not "shift" in keyname and shift == True:
             try:
                 val = self.hatsuon[keyname]
             except:
-                print("hatsuon not exist")
-                val = ""
+                val = None
         else:
-            val = self.kana[keyname]
+            try:
+                val = self.kana[keyname]
+            except:
+                val = None
         return val
 
     def do(self,keyname,shift=False):
-        val = self.sound(keyname,shift)
+        val = self._exchange(keyname,shift)
         return KeyObj(val)
 
 class EngDecoder:
@@ -255,11 +257,7 @@ class GameLoop:
                                 )
             DISPLAYSURF.blit(self.textSurfaceObj, self.textRectObj)
 
-
-
-
             keyname,shift = self.input_key()
-
             if keyname is None:
                 pass
             else:
@@ -268,7 +266,9 @@ class GameLoop:
                     self.change_mode()
                 else:
                     key_obj = self.key_decoder.do(keyname, shift)
-                    print(keyname)
+                    print(key_obj.rome_spell)
+
+                    #print(keyname)
                     self.sp.play(keyname)
                     self.fontd.change(keyname,self.mode)
 
