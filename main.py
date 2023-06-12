@@ -167,7 +167,11 @@ class SpellingObserver:
         self.queue.append(key_input)
 
 
-class JpMode:
+class KeyObj:
+    def __init__(self,rome_spell):
+        self.rome_spell = rome_spell
+
+class JpDecoder:
     def __init__(self):
         self.kana = {'0': "wa", '1': "nu", '2': "hu", '3': "a", '4': "u", '5': "e", '6': "o", '7': "ya", '8': "yu",
                      '9': "yo", 'a': "ti", 'b': "ko", 'c': "so", 'd': "si", 'e': "i", 'f': "ha", 'g': "ki", 'h': "ku",
@@ -176,28 +180,28 @@ class JpMode:
                      ',': "ne", '-': "ho", '.': "ru", '/': "me", ':': "ke", ';': "re", ']': "mu", '^': "he",
                      '\\': "ro", }
 
-    def kanaMode(self):
+    def sound(self,keyname,shift):
         self.hatsuon = {'z':"xtu",'7':"xya",'8':"xyu",'9':"xyo"}
-        if self.shift_key == True:
+        if shift == True:
             try:
-                val = self.hatsuon[self.keyname]
+                val = self.hatsuon[keyname]
             except:
                 print("hatsuon not exist")
                 val = ""
         else:
-            val = self.kana[self.shift_key]
+            val = self.kana[keyname]
+        return val
 
-class EngMode:
+    def do(self,keyname,shift=False):
+        val = self.sound(keyname,shift)
+        return KeyObj(val)
+
+class EngDecoder:
     def __init__(self):
         pass
 
-
-class KeyDecoder:
-    def __init__(self,mode):
-        self.mode = mode
-
     def do(self,keyname,shift=False):
-        return self.mode.key_input(keyname,shift)
+        pass #return self.mode.key_input(keyname,shift)
 
 
 
@@ -215,7 +219,7 @@ class GameLoop:
         self.fontd = FontDisplay()
         self.mode = Mode.ENGLISH
 
-        self.key_decoder = KeyDecoder()
+        self.key_decoder = JpDecoder()
 
     def _halt(self):
         pygame.quit()
@@ -252,10 +256,9 @@ class GameLoop:
             DISPLAYSURF.blit(self.textSurfaceObj, self.textRectObj)
 
 
-            jp_mode = JpMode()
+
 
             keyname,shift = self.input_key()
-            key_obj = self.key_decoder.do(keyname, jp_mode, shift)
 
             if keyname is None:
                 pass
@@ -264,6 +267,7 @@ class GameLoop:
                     print("mode change")
                     self.change_mode()
                 else:
+                    key_obj = self.key_decoder.do(keyname, shift)
                     print(keyname)
                     self.sp.play(keyname)
                     self.fontd.change(keyname,self.mode)
