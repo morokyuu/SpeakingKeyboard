@@ -84,7 +84,7 @@ class FontDisplay:
 
         if self.mode == Mode.ENGLISH:
             self.font_gen = AlphabetFont()
-        elif self.mode == Mode.KANA:
+        elif self.mode == Mode.JAPANESE:
             self.font_gen = KanaFont()
         self.font_gen.change(char)
 
@@ -94,7 +94,7 @@ class FontDisplay:
 
 class Mode(Enum):
     ENGLISH = 0,
-    KANA = 1
+    JAPANESE = 1
 
 
 def load_eng_dict():
@@ -136,7 +136,7 @@ class SoundPlayer:
     def set_mode(self,mode):
         if mode == Mode.ENGLISH:
             self.mp3dict = load_eng_dict()
-        elif mode == Mode.KANA:
+        elif mode == Mode.JAPANESE:
             self.mp3dict,_ = load_kana_dict()
         pass
 
@@ -158,6 +158,49 @@ class SoundPlayer:
 
 
 
+
+class SpellingObserver:
+    def __init__(self):
+        self.queue = []
+
+    def input(self,key_input):
+        self.queue.append(key_input)
+
+
+class JpMode:
+    def __init__(self):
+        self.kana = {'0': "wa", '1': "nu", '2': "hu", '3': "a", '4': "u", '5': "e", '6': "o", '7': "ya", '8': "yu",
+                     '9': "yo", 'a': "ti", 'b': "ko", 'c': "so", 'd': "si", 'e': "i", 'f': "ha", 'g': "ki", 'h': "ku",
+                     'i': "ni", 'j': "ma", 'k': "no", 'l': "ri", 'm': "mo", 'n': "mi", 'o': "ra", 'p': "se", 'q': "ta",
+                     'r': "su", 's': "to", 't': "ka", 'u': "na", 'v': "hi", 'w': "te", 'x': "sa", 'y': "nn", 'z': "tu",
+                     ',': "ne", '-': "ho", '.': "ru", '/': "me", ':': "ke", ';': "re", ']': "mu", '^': "he",
+                     '\\': "ro", }
+
+class EngMode:
+    def __init__(self):
+        pass
+class KeyDecoder:
+    def __init__(self):
+        pass
+
+    def input(self,keyname,mode,shift_key=False):
+        self.keyname = keyname
+        self.mode = mode
+        self.shift_key = shift_key
+
+
+    def kanaMode(self):
+        self.hatsuon = {'z':"xtu",'7':"xya",'8':"xyu",'9':"xyo"}
+        if self.shift_key == True:
+            try:
+                val = self.hatsuon[self.keyname]
+            except:
+                print("hatsuon not exist")
+                val = ""
+        else:
+            val = self.kana[self.shift_key]
+
+
 class GameLoop:
     def __init__(self):
         fontObj = pygame.font.Font('freesansbold.ttf', 60)
@@ -171,24 +214,31 @@ class GameLoop:
         self.fontd = FontDisplay()
         self.mode = Mode.ENGLISH
 
+        self.key_decoder = KeyDecoder()
+
+    def _halt(self):
+        pygame.quit()
+        sys.exit()
+
     def input_key(self) -> str | None:
         keyname = None
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+                self._halt()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    pygame.quit()
-                    sys.exit()
+                    self._halt()
+                elif event.key == pygame.K_2 and pygame.key.get_mods() & pygame.KMOD_SHIFT:
+                    self.key_decoder.input(keyname, self.mode, True)
                 else:
                     keyname = pygame.key.name(event.key)
+                    self.key_decoder.input(keyname,self.mode)
         return keyname
 
     def change_mode(self):
         if self.mode == Mode.ENGLISH:
-            self.mode = Mode.KANA
-        elif self.mode == Mode.KANA:
+            self.mode = Mode.JAPANESE
+        elif self.mode == Mode.JAPANESE:
             self.mode = Mode.ENGLISH
         self.sp.set_mode(self.mode)
 
@@ -199,6 +249,8 @@ class GameLoop:
                                 ((146, 0), (291, 106), (236, 277), (56, 277), (0, 106))
                                 )
             DISPLAYSURF.blit(self.textSurfaceObj, self.textRectObj)
+
+
 
             keyname = self.input_key()
             if keyname is None:
