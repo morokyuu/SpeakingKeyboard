@@ -162,14 +162,34 @@ class SoundPlayer:
 class SpellingObserver:
     def __init__(self):
         self.queue = []
+        self.spell = {"abc","hello","pig","money","book"}
 
-    def input(self,key_input):
-        self.queue.append(key_input)
+    def _check(self,q):
+        for sp in self.spell:
+            if sp in q:
+                self.queue.clear()
+                return True,sp
+        return False,None
+
+    def input(self,key_obj):
+        self.queue.append(key_obj)
+        q = [k.raw for k in self.queue]
+        q = ''.join(q)
+        exist,val = self._check(q)
+        if exist:
+            val = KeyObj(val)
+            return val
+        else:
+            return key_obj
+
+
+
+
 
 
 class KeyObj:
-    def __init__(self,rome_spell):
-        self.rome_spell = rome_spell
+    def __init__(self,raw):
+        self.raw = raw
 
 class JpDecoder:
     def __init__(self):
@@ -203,7 +223,7 @@ class EngDecoder:
         pass
 
     def do(self,keyname,shift=False):
-        pass #return self.mode.key_input(keyname,shift)
+        return KeyObj(keyname)
 
 
 
@@ -221,7 +241,9 @@ class GameLoop:
         self.fontd = FontDisplay()
         self.mode = Mode.ENGLISH
 
-        self.key_decoder = JpDecoder()
+        self.key_decoder = EngDecoder()
+
+        self.spo = SpellingObserver()
 
     def _halt(self):
         pygame.quit()
@@ -245,8 +267,10 @@ class GameLoop:
     def change_mode(self):
         if self.mode == Mode.ENGLISH:
             self.mode = Mode.JAPANESE
+            self.key_decoder = JpDecoder()
         elif self.mode == Mode.JAPANESE:
             self.mode = Mode.ENGLISH
+            self.key_decoder = EngDecoder()
         self.sp.set_mode(self.mode)
 
     def do(self):
@@ -257,7 +281,9 @@ class GameLoop:
                                 )
             DISPLAYSURF.blit(self.textSurfaceObj, self.textRectObj)
 
+            key_obj = None
             keyname,shift = self.input_key()
+
             if keyname is None:
                 pass
             else:
@@ -266,11 +292,14 @@ class GameLoop:
                     self.change_mode()
                 else:
                     key_obj = self.key_decoder.do(keyname, shift)
-                    print(key_obj.rome_spell)
+                    print(key_obj.raw)
 
-                    #print(keyname)
                     self.sp.play(keyname)
                     self.fontd.change(keyname,self.mode)
+
+            if not key_obj == None:
+                key_obj = self.spo.input(key_obj)
+                print(key_obj.raw)
 
             self.fontd.draw()
             pygame.display.update()
