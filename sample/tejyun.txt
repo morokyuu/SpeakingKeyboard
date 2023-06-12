@@ -16,3 +16,10 @@ python3 -c 'text = "あいうえおかきくけこさしすせそたちつてと
 cat kana_number.txt | sort -t' ' -k3
 
 
+がらくた
+cat kana_mode | sed "s/\.\/wav\/hiragana\///g" | sed "s/\.mp3//g" | cut -d' ' -f3 | awk '{print tolower($1)}' | awk '{printf("%s ./wav/hiragana/%s.mp3\n",$1,toupper($1))}'
+
+ru ./wav/hiragana/RU.mp3
+me ./wav/hiragana/ME.mp3
+ke ./wav/hiragana/KE.mp3
+

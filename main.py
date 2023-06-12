@@ -84,7 +84,7 @@ class FontDisplay:
 
         if self.mode == Mode.ENGLISH:
             self.font_gen = AlphabetFont()
-        elif self.mode == Mode.KANA:
+        elif self.mode == Mode.JAPANESE:
             self.font_gen = KanaFont()
         self.font_gen.change(char)
 
@@ -94,7 +94,7 @@ class FontDisplay:
 
 class Mode(Enum):
     ENGLISH = 0,
-    KANA = 1
+    JAPANESE = 1
 
 
 def load_eng_dict():
@@ -136,7 +136,7 @@ class SoundPlayer:
     def set_mode(self,mode):
         if mode == Mode.ENGLISH:
             self.mp3dict = load_eng_dict()
-        elif mode == Mode.KANA:
+        elif mode == Mode.JAPANESE:
             self.mp3dict,_ = load_kana_dict()
         pass
 
@@ -158,6 +158,79 @@ class SoundPlayer:
 
 
 
+
+class SpellingObserver:
+    def __init__(self):
+        self.queue = []
+        self.spell = {"abc","hello","pig","money","book"}
+        #self.kana_spell = [["na","su"],["a","sa","ga","o"]]
+        self.kana_spell = ["nasu","asagao","sixyuxtuhamarutu"]
+
+
+    def _check(self,q):
+        for sp in self.spell:
+            if sp in q:
+                self.queue.clear()
+                return True,sp
+        return False,None
+
+    def input(self,key_obj):
+        self.queue.append(key_obj)
+        q = [k.raw for k in self.queue]
+        q = ''.join(q)
+        exist,val = self._check(q)
+        if exist:
+            val = KeyObj(val)
+            return val
+        else:
+            return key_obj
+
+
+
+
+
+
+class KeyObj:
+    def __init__(self,raw):
+        self.raw = raw
+
+class JpDecoder:
+    def __init__(self):
+        self.kana = {'0': "wa", '1': "nu", '2': "hu", '3': "a", '4': "u", '5': "e", '6': "o", '7': "ya", '8': "yu",
+                     '9': "yo", 'a': "ti", 'b': "ko", 'c': "so", 'd': "si", 'e': "i", 'f': "ha", 'g': "ki", 'h': "ku",
+                     'i': "ni", 'j': "ma", 'k': "no", 'l': "ri", 'm': "mo", 'n': "mi", 'o': "ra", 'p': "se", 'q': "ta",
+                     'r': "su", 's': "to", 't': "ka", 'u': "na", 'v': "hi", 'w': "te", 'x': "sa", 'y': "nn", 'z': "tu",
+                     ',': "ne", '-': "ho", '.': "ru", '/': "me", ':': "ke", ';': "re", ']': "mu", '^': "he",
+                     '\\': "ro", }
+
+    def _exchange(self,keyname,shift):
+        self.hatsuon = {'[':"maru",'@':"dakuten",'z':"xtu",'7':"xya",'8':"xyu",'9':"xyo"}
+        if not "shift" in keyname and shift == True:
+            try:
+                val = self.hatsuon[keyname]
+            except:
+                val = None
+        else:
+            try:
+                val = self.kana[keyname]
+            except:
+                val = None
+        return val
+
+    def do(self,keyname,shift=False):
+        val = self._exchange(keyname,shift)
+        return KeyObj(val)
+
+class EngDecoder:
+    def __init__(self):
+        pass
+
+    def do(self,keyname,shift=False):
+        return KeyObj(keyname)
+
+
+
+
 class GameLoop:
     def __init__(self):
         fontObj = pygame.font.Font('freesansbold.ttf', 60)
@@ -171,25 +244,36 @@ class GameLoop:
         self.fontd = FontDisplay()
         self.mode = Mode.ENGLISH
 
-    def input_key(self) -> str | None:
+        self.key_decoder = EngDecoder()
+
+        self.spo = SpellingObserver()
+
+    def _halt(self):
+        pygame.quit()
+        sys.exit()
+
+    def input_key(self):
         keyname = None
+        shift = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+                self._halt()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    pygame.quit()
-                    sys.exit()
+                    self._halt()
                 else:
+                    if pygame.key.get_mods() & pygame.KMOD_SHIFT:
+                        shift = True
                     keyname = pygame.key.name(event.key)
-        return keyname
+        return keyname,shift
 
     def change_mode(self):
         if self.mode == Mode.ENGLISH:
-            self.mode = Mode.KANA
-        elif self.mode == Mode.KANA:
+            self.mode = Mode.JAPANESE
+            self.key_decoder = JpDecoder()
+        elif self.mode == Mode.JAPANESE:
             self.mode = Mode.ENGLISH
+            self.key_decoder = EngDecoder()
         self.sp.set_mode(self.mode)
 
     def do(self):
@@ -200,7 +284,9 @@ class GameLoop:
                                 )
             DISPLAYSURF.blit(self.textSurfaceObj, self.textRectObj)
 
-            keyname = self.input_key()
+            key_obj = None
+            keyname,shift = self.input_key()
+
             if keyname is None:
                 pass
             else:
@@ -208,9 +294,14 @@ class GameLoop:
                     print("mode change")
                     self.change_mode()
                 else:
-                    print(keyname)
+                    key_obj = self.key_decoder.do(keyname, shift)
+
                     self.sp.play(keyname)
                     self.fontd.change(keyname,self.mode)
+
+            if not key_obj == None:
+                key_obj = self.spo.input(key_obj)
+                print(key_obj.raw)
 
             self.fontd.draw()
             pygame.display.update()
