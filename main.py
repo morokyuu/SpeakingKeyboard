@@ -191,8 +191,9 @@ class SpellingObserver:
 
 
 class KeyObj:
-    def __init__(self,raw):
+    def __init__(self,raw,label):
         self.raw = raw
+        self.label = label
 
 class JpDecoder:
     def __init__(self):
@@ -202,31 +203,48 @@ class JpDecoder:
                      'r': "su", 's': "to", 't': "ka", 'u': "na", 'v': "hi", 'w': "te", 'x': "sa", 'y': "nn", 'z': "tu",
                      ',': "ne", '-': "ho", '.': "ru", '/': "me", ':': "ke", ';': "re", ']': "mu", '^': "he",
                      '\\': "ro", }
+        self.hatsuon = {'[':"maru",'@':"dakuten",'z':"xtu",'7':"xya",'8':"xyu",'9':"xyo"}
+
+        self.kana_label = {
+            'a': "あ", 'i': "い", 'u': "う", 'e': "え", 'o': "お", 'ka': "か", 'ki': "き", 'ku': "く", 'ke': "け", 'ko': "こ",
+            'sa': "さ", 'si': "し", 'su': "す", 'se': "せ", 'so': "そ", 'ta': "た", 'ti': "ち", 'tu': "つ", 'te': "て",
+            'to': "と", 'na': "な", 'ni': "に", 'nu': "ぬ", 'ne': "ね", 'no': "の", 'ha': "は", 'hi': "ひ", 'hu': "ふ",
+            'he': "へ", 'ho': "ほ", 'ma': "ま", 'mi': "み", 'mu': "む", 'me': "め", 'mo': "も", 'ya': "や", 'yu': "ゆ",
+            'yo': "よ", 'ra': "ら", 'ri': "り", 'ru': "る", 're': "れ", 'ro': "ろ", 'wa': "わ", 'wo': "を", 'nn': "ん",
+            'maru':"゜",'dakuten':"゛",'xtu':"っ",'xya':"ゃ",'xyu':"ゅ",'xyo':"ょ"
+        }
 
     def _exchange(self,keyname,shift):
-        self.hatsuon = {'[':"maru",'@':"dakuten",'z':"xtu",'7':"xya",'8':"xyu",'9':"xyo"}
         if not "shift" in keyname and shift == True:
             try:
                 val = self.hatsuon[keyname]
             except:
-                val = None
+                val = ""
         else:
             try:
                 val = self.kana[keyname]
             except:
-                val = None
+                val = ""
         return val
+
+    def _get_label(self,val):
+        try:
+            label = self.kana_label[val]
+        except:
+            label = ""
+        return label
 
     def do(self,keyname,shift=False):
         val = self._exchange(keyname,shift)
-        return KeyObj(val)
+        label = self._get_label(val)
+        return KeyObj(val,label)
 
 class EngDecoder:
     def __init__(self):
         pass
 
     def do(self,keyname,shift=False):
-        return KeyObj(keyname)
+        return KeyObj(keyname,keyname)
 
 
 
@@ -284,7 +302,7 @@ class GameLoop:
                                 )
             DISPLAYSURF.blit(self.textSurfaceObj, self.textRectObj)
 
-            key_obj = None
+            key_obj = KeyObj("","")
             keyname,shift = self.input_key()
 
             if keyname is None:
@@ -299,7 +317,7 @@ class GameLoop:
                     self.sp.play(keyname)
                     self.fontd.change(keyname,self.mode)
 
-            if not key_obj == None:
+            if len(key_obj.raw) > 0:
                 key_obj = self.spo.input(key_obj)
                 print(key_obj.raw)
 

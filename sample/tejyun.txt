@@ -23,3 +23,11 @@ ru ./wav/hiragana/RU.mp3
 me ./wav/hiragana/ME.mp3
 ke ./wav/hiragana/KE.mp3
 
+
+
+awkのなかの書式で、
+シングルクォーテーション・ダブルクォーテーションの入れ方
+https://itneko.com/awk-single-quotation/
+
+
+
