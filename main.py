@@ -157,14 +157,36 @@ class SoundPlayer:
             play_effect_kotsu()
 
 
+class Jp_SpellingObserver:
+    def __init__(self):
+        #self.kana_spell = [["na","su"],["a","sa","ga","o"]]
+        self.kana_spell = ["nasu","asagao","sixyuxtuhamarutu"]
+        self.queue = []
 
+    def _check(self):
+        pass
 
-class SpellingObserver:
+    def input(self,key_obj):
+        self.queue.append(key_obj)
+        q = [k.raw for k in self.queue]
+        q = ''.join(q)
+
+        l = [k.label for k in self.queue]
+        l = ''.join(l)
+        print(l)
+        return key_obj
+
+#        exist,val = self._check(q)
+#        if exist:
+#            val = KeyObj(val)
+#            return val
+#        else:
+#            return key_obj
+
+class Eng_SpellingObserver:
     def __init__(self):
         self.queue = []
         self.spell = {"abc","hello","pig","money","book"}
-        #self.kana_spell = [["na","su"],["a","sa","ga","o"]]
-        self.kana_spell = ["nasu","asagao","sixyuxtuhamarutu"]
 
 
     def _check(self,q):
@@ -180,7 +202,7 @@ class SpellingObserver:
         q = ''.join(q)
         exist,val = self._check(q)
         if exist:
-            val = KeyObj(val)
+            val = KeyObj(val,val)
             return val
         else:
             return key_obj
@@ -263,8 +285,7 @@ class GameLoop:
         self.mode = Mode.ENGLISH
 
         self.key_decoder = EngDecoder()
-
-        self.spo = SpellingObserver()
+        self.spo = Eng_SpellingObserver()
 
     def _halt(self):
         pygame.quit()
@@ -289,9 +310,11 @@ class GameLoop:
         if self.mode == Mode.ENGLISH:
             self.mode = Mode.JAPANESE
             self.key_decoder = JpDecoder()
+            self.spo = Jp_SpellingObserver()
         elif self.mode == Mode.JAPANESE:
             self.mode = Mode.ENGLISH
             self.key_decoder = EngDecoder()
+            self.spo = Eng_SpellingObserver()
         self.sp.set_mode(self.mode)
 
     def do(self):
