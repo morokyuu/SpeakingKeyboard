@@ -160,7 +160,7 @@ class SoundPlayer:
 class Jp_SpellingObserver:
     def __init__(self):
         #self.kana_spell = [["na","su"],["a","sa","ga","o"]]
-        self.kana_spell = ["nasu","asagao","tikatetu"]
+        self.kana_spell = ["ka:su","nasu","asaka:o","tikatetu","ha0inaxtuhu0ru"]
         self.queue = []
 
     def _check(self,queue):
@@ -231,7 +231,7 @@ class JpDecoder:
                      'r': "su", 's': "to", 't': "ka", 'u': "na", 'v': "hi", 'w': "te", 'x': "sa", 'y': "nn", 'z': "tu",
                      ',': "ne", '-': "ho", '.': "ru", '/': "me", ':': "ke", ';': "re", ']': "mu", '^': "he",
                      '\\': "ro", }
-        self.hatsuon = {'[':"maru",'@':"dakuten",'z':"xtu",'7':"xya",'8':"xyu",'9':"xyo"}
+        self.hatsuon = {'[':"0",'@':":",'z':"xtu",'7':"xya",'8':"xyu",'9':"xyo"}
 
         self.kana_label = {
             'a': "あ", 'i': "い", 'u': "う", 'e': "え", 'o': "お", 'ka': "か", 'ki': "き", 'ku': "く", 'ke': "け", 'ko': "こ",
@@ -239,7 +239,7 @@ class JpDecoder:
             'to': "と", 'na': "な", 'ni': "に", 'nu': "ぬ", 'ne': "ね", 'no': "の", 'ha': "は", 'hi': "ひ", 'hu': "ふ",
             'he': "へ", 'ho': "ほ", 'ma': "ま", 'mi': "み", 'mu': "む", 'me': "め", 'mo': "も", 'ya': "や", 'yu': "ゆ",
             'yo': "よ", 'ra': "ら", 'ri': "り", 'ru': "る", 're': "れ", 'ro': "ろ", 'wa': "わ", 'wo': "を", 'nn': "ん",
-            'maru':"゜",'dakuten':"゛",'xtu':"っ",'xya':"ゃ",'xyu':"ゅ",'xyo':"ょ"
+            '0':"゜",':':"゛",'xtu':"っ",'xya':"ゃ",'xyu':"ゅ",'xyo':"ょ"
         }
 
     def _exchange(self,keyname,shift):
