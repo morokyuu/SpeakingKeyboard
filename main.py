@@ -160,28 +160,33 @@ class SoundPlayer:
 class Jp_SpellingObserver:
     def __init__(self):
         #self.kana_spell = [["na","su"],["a","sa","ga","o"]]
-        self.kana_spell = ["nasu","asagao","sixyuxtuhamarutu"]
+        self.kana_spell = ["nasu","asagao","tikatetu"]
         self.queue = []
 
-    def _check(self):
-        pass
+    def _check(self,queue):
+        for sp in self.kana_spell:
+            if sp in queue:
+                self.queue.clear()
+                return True,sp
+        return False,None
 
     def input(self,key_obj):
         self.queue.append(key_obj)
         q = [k.raw for k in self.queue]
         q = ''.join(q)
+        print(q)
 
         l = [k.label for k in self.queue]
         l = ''.join(l)
         print(l)
-        return key_obj
 
-#        exist,val = self._check(q)
-#        if exist:
-#            val = KeyObj(val)
-#            return val
-#        else:
-#            return key_obj
+        exist,val = self._check(q)
+        if exist:
+            print("spell found------------")
+            val = KeyObj(val,l)
+            return val
+        else:
+            return key_obj
 
 class Eng_SpellingObserver:
     def __init__(self):
@@ -202,6 +207,7 @@ class Eng_SpellingObserver:
         q = ''.join(q)
         exist,val = self._check(q)
         if exist:
+            print("spell found------------")
             val = KeyObj(val,val)
             return val
         else:
