@@ -3,4 +3,5 @@ python_binary/
 venv/
 __pycache__/
 *swp
-*~
+*un~
+*py~

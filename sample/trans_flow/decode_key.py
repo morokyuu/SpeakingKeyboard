@@ -1,4 +1,5 @@
 import keyboard as key
+import time
 
 ## keyboard input lib
 ## https://dntf.hatenablog.com/entry/py_keyboard_lib
@@ -21,6 +22,7 @@ class JpDecoder:
             'yo': "よ", 'ra': "ら", 'ri': "り", 'ru': "る", 're': "れ", 'ro': "ろ", 'wa': "わ", 'wo': "を", 'nn': "ん",
             '0':"゜",':':"゛",'xtu':"っ",'xya':"ゃ",'xyu':"ゅ",'xyo':"ょ"
         }
+
     def inkey2midkey(self,inkey):
         try:
             midkey = self.kana[inkey]
@@ -38,17 +40,21 @@ class JpDecoder:
         return False,''
 
     def loop(self):
+        spell = ""
         while True:
             inkey = key.read_key()
+            time.sleep(0.3)
             if inkey == 'esc':
                 exit()
-            else:
-                flg,midkey = self.inkey2midkey(inkey)
-                if flg:
-                    print(midkey)
-                    flg2,label = self.midkey2label(midkey)
-                    if flg2:
-                        print("label"+label)
+
+            flag,midkey = self.inkey2midkey(inkey)
+            if flag:
+                print(midkey)
+                flag,label = self.midkey2label(midkey)
+
+                if flag:
+                    spell += label
+                print("spell ="+spell)
 
 
 if __name__ == '__main__':
