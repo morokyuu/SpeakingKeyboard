@@ -17,7 +17,7 @@ class JpDecoder:
         self.kana_label = {
             'a': "あ", 'i': "い", 'u': "う", 'e': "え", 'o': "お", 'ka': "か", 'ki': "き", 'ku': "く", 'ke': "け", 'ko': "こ",
             'sa': "さ", 'si': "し", 'su': "す", 'se': "せ", 'so': "そ", 'ta': "た", 'ti': "ち", 'tu': "つ", 'te': "て",
-            'to': "と", 'na': "な", 'ni': "に", 'nu': "ぬ", 'ne': "ね", 'no': "の", 'ha': "は", 'hi': "ひ", 'hu': "ふ",
+            'to': "と", 'na': "な", 'ni': "に", 'nu': "ぬ", 'ne': "ねasdf", 'no': "の", 'ha': "は", 'hi': "ひ", 'hu': "ふ",
             'he': "へ", 'ho': "ほ", 'ma': "ま", 'mi': "み", 'mu': "む", 'me': "め", 'mo': "も", 'ya': "や", 'yu': "ゆ",
             'yo': "よ", 'ra': "ら", 'ri': "り", 'ru': "る", 're': "れ", 'ro': "ろ", 'wa': "わ", 'wo': "を", 'nn': "ん",
             '0':"゜",':':"゛",'xtu':"っ",'xya':"ゃ",'xyu':"ゅ",'xyo':"ょ"
@@ -49,12 +49,14 @@ class JpDecoder:
 
             flag,midkey = self.inkey2midkey(inkey)
             if flag:
-                print(midkey)
+                print(f"pressed:{midkey}")
                 flag,label = self.midkey2label(midkey)
 
                 if flag:
                     spell += label
-                print("spell ="+spell)
+                print(f"spell:{spell}")
+                code = spell.encode('cp932')
+                print(f"code:{code}")
 
 
 if __name__ == '__main__':
