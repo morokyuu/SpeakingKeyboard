@@ -1,10 +1,41 @@
 import keyboard as key
 import time
+import re
 
 ## keyboard input lib
 ## https://dntf.hatenablog.com/entry/py_keyboard_lib
 
+
+class DakutenFixer:
+    # result = re.sub(b'\x82\xcd\x81K', b'\x82\xcf', code)
+    def __init__(self):
+        before = 'かきくけこさしすせそたちつてとはひふへほ'
+        after = 'がぎぐげござじずぜぞだぢづでどばびぶべぼ'
+        dakuten = []
+        for b,a in zip(before,after):
+            bcode = b.encode('cp932') + '゛'.encode('cp932')
+            acode = a.encode('cp932')
+            # print(f"{b}゛,{a},{bcode},{acode}")
+            dakuten.append((bcode,acode))
+
+        before = 'はひふへほ'
+        after = 'ぱぴぷぺぽ'
+        handakuten = []
+        for b,a in zip(before,after):
+            bcode = b.encode('cp932') + '゜'.encode('cp932')
+            acode = a.encode('cp932')
+            # print(f"{b}゜,{a},{bcode},{acode}")
+            handakuten.append((bcode,acode))
+        self.tr_table = dakuten + handakuten
+    def fix(self,text):
+        text = text.encode('cp932')
+        for b, a in self.tr_table:
+            text = re.sub(b, a, text)
+        return text
+
+
 class JpDecoder:
+    # 入力キーをローマ字に置き換える
     def __init__(self):
         self.kana = {'0': "wa", '1': "nu", '2': "hu", '3': "a", '4': "u", '5': "e", '6': "o", '7': "ya", '8': "yu",
                      '9': "yo", 'a': "ti", 'b': "ko", 'c': "so", 'd': "si", 'e': "i", 'f': "ha", 'g': "ki", 'h': "ku",
@@ -39,26 +70,31 @@ class JpDecoder:
             pass
         return False,''
 
-    def loop(self):
-        spell = ""
-        while True:
-            inkey = key.read_key()
-            time.sleep(0.3)
-            if inkey == 'esc':
-                exit()
 
-            flag,midkey = self.inkey2midkey(inkey)
+
+def mainloop():
+    decoder = JpDecoder()
+    df = DakutenFixer()
+
+    spell = ""
+    while True:
+        inkey = key.read_key()
+        time.sleep(0.3)
+        if inkey == 'esc':
+            exit()
+
+        flag,midkey = decoder.inkey2midkey(inkey)
+        if flag:
+            print(f"pressed:{midkey}")
+            flag,label = decoder.midkey2label(midkey)
+
             if flag:
-                print(f"pressed:{midkey}")
-                flag,label = self.midkey2label(midkey)
-
-                if flag:
-                    spell += label
+                spell += label
                 print(f"spell:{spell}")
-                code = spell.encode('cp932')
-                print(f"code:{code}")
+                label = df.fix(spell)
+                print(f"spell:{label.decode('cp932')}")
+
 
 
 if __name__ == '__main__':
-    decoder = JpDecoder()
-    decoder.loop()
+    mainloop()
