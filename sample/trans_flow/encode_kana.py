@@ -41,10 +41,10 @@ for b,a in zip(before,after):
 
 tr_table = dakuten + handakuten
 
-
 # result = re.sub(b'\x82\xcd\x81K', b'\x82\xcf', code)
 
-st = "は゜いなっふ゜る"
+# st = "は゜いなっふ゜る"
+st = "は゛んく゛らて゛ぃっしゅ"
 st = st.encode('cp932')
 for b,a in tr_table:
     st = re.sub(b,a,st)
