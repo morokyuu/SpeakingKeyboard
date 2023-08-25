@@ -18,39 +18,40 @@ https://pentan.info/doc/unicode_list.html
 
 import re
 
+class DakutenFixer:
+    # result = re.sub(b'\x82\xcd\x81K', b'\x82\xcf', code)
+    def __init__(self):
+        before = 'かきくけこさしすせそたちつてとはひふへほ'
+        after = 'がぎぐげござじずぜぞだぢづでどばびぶべぼ'
+        dakuten = []
+        for b,a in zip(before,after):
+            bcode = b.encode('cp932') + '゛'.encode('cp932')
+            acode = a.encode('cp932')
+            # print(f"{b}゛,{a},{bcode},{acode}")
+            dakuten.append((bcode,acode))
 
-before = 'かきくけこさしすせそたちつてとはひふへほ'
-after = 'がぎぐげござじずぜぞだぢづでどばびぶべぼ'
-
-dakuten = []
-for b,a in zip(before,after):
-    bcode = b.encode('cp932') + '゛'.encode('cp932')
-    acode = a.encode('cp932')
-    # print(f"{b}゛,{a},{bcode},{acode}")
-    dakuten.append((bcode,acode))
-
-before = 'はひふへほ'
-after = 'ぱぴぷぺぽ'
-
-handakuten = []
-for b,a in zip(before,after):
-    bcode = b.encode('cp932') + '゜'.encode('cp932')
-    acode = a.encode('cp932')
-    # print(f"{b}゜,{a},{bcode},{acode}")
-    handakuten.append((bcode,acode))
-
-tr_table = dakuten + handakuten
-
-# result = re.sub(b'\x82\xcd\x81K', b'\x82\xcf', code)
+        before = 'はひふへほ'
+        after = 'ぱぴぷぺぽ'
+        handakuten = []
+        for b,a in zip(before,after):
+            bcode = b.encode('cp932') + '゜'.encode('cp932')
+            acode = a.encode('cp932')
+            # print(f"{b}゜,{a},{bcode},{acode}")
+            handakuten.append((bcode,acode))
+        self.tr_table = dakuten + handakuten
+    def fix(self,text):
+        text = text.encode('cp932')
+        for b, a in self.tr_table:
+            text = re.sub(b, a, text)
+        return text
 
 # st = "は゜いなっふ゜る"
 st = "は゛んく゛らて゛ぃっしゅ"
-st = st.encode('cp932')
-for b,a in tr_table:
-    st = re.sub(b,a,st)
-
-
 print(st)
+
+df = DakutenFixer()
+st = df.fix(st)
 print(st.decode('cp932'))
+
 
 
