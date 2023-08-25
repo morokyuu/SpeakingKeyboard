@@ -26,7 +26,7 @@ dakuten = []
 for b,a in zip(before,after):
     bcode = b.encode('cp932') + '゛'.encode('cp932')
     acode = a.encode('cp932')
-    print(f"{b}゛,{a},{bcode},{acode}")
+    # print(f"{b}゛,{a},{bcode},{acode}")
     dakuten.append((bcode,acode))
 
 before = 'はひふへほ'
@@ -34,27 +34,23 @@ after = 'ぱぴぷぺぽ'
 
 handakuten = []
 for b,a in zip(before,after):
-    bcode = b.encode('cp932') + '゛'.encode('cp932')
+    bcode = b.encode('cp932') + '゜'.encode('cp932')
     acode = a.encode('cp932')
-    print(f"{b}゜,{a},{bcode},{acode}")
+    # print(f"{b}゜,{a},{bcode},{acode}")
     handakuten.append((bcode,acode))
 
+tr_table = dakuten + handakuten
 
 
+# result = re.sub(b'\x82\xcd\x81K', b'\x82\xcf', code)
+
+st = "は゜いなっふ゜る"
+st = st.encode('cp932')
+for b,a in tr_table:
+    st = re.sub(b,a,st)
 
 
-exit()
+print(st)
+print(st.decode('cp932'))
 
 
-# spell ='きくますとのは゜てみし゛らたす゛'
-spell = 'は゜か゛'
-# spell = 'ぱ'
-code = spell.encode('cp932')
-print(spell)
-print(code)
-
-result = re.sub(b'\x82\xcd\x81K', b'\x82\xcf', code)
-result = re.sub(b'\x82\xa9\x81J', b'\x82\xaa', result)
-
-print(result)
-print(result.decode('cp932'))
