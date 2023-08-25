@@ -19,6 +19,33 @@ https://pentan.info/doc/unicode_list.html
 import re
 
 
+before = 'かきくけこさしすせそたちつてとはひふへほ'
+after = 'がぎぐげござじずぜぞだぢづでどばびぶべぼ'
+
+dakuten = []
+for b,a in zip(before,after):
+    bcode = b.encode('cp932') + '゛'.encode('cp932')
+    acode = a.encode('cp932')
+    print(f"{b}゛,{a},{bcode},{acode}")
+    dakuten.append((bcode,acode))
+
+before = 'はひふへほ'
+after = 'ぱぴぷぺぽ'
+
+handakuten = []
+for b,a in zip(before,after):
+    bcode = b.encode('cp932') + '゛'.encode('cp932')
+    acode = a.encode('cp932')
+    print(f"{b}゜,{a},{bcode},{acode}")
+    handakuten.append((bcode,acode))
+
+
+
+
+
+exit()
+
+
 # spell ='きくますとのは゜てみし゛らたす゛'
 spell = 'は゜か゛'
 # spell = 'ぱ'
