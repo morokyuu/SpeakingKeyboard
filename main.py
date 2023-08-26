@@ -326,6 +326,9 @@ class GameLoop:
                 if keyname == 'space':
                     print("mode change")
                     self.change_mode()
+                elif keyname == 'return':
+                    print("========return")
+                    self.spell = ""
                 else:
                     label = self.key_decoder.do(keyname, shift)
                     self.spell += label
@@ -333,16 +336,13 @@ class GameLoop:
                     self.sp.play(keyname)
                     self.fontd.change(keyname,self.mode)
 
-            if keyname is None:
-                pass
-            else:
-                print(f"now = {self.spell}")
-                candidate, fullmatch = self.kwd.get_candidate(self.spell)
-                if candidate:
-                    for i,c in enumerate(candidate):
-                        print(f" candidate[{i}]:{c}")
-                if fullmatch:
-                    print(f"fullmatch:{fullmatch}")
+                    print(f"now = {self.spell}")
+                    candidate, fullmatch = self.kwd.get_candidate(self.spell)
+                    if len(candidate) > 0:
+                        for i,c in enumerate(candidate):
+                            print(f" candidate[{i}]:{c}")
+                    if fullmatch:
+                        print(f"fullmatch:{fullmatch}")
 
             self.fontd.draw()
             #pygame.display.update()
