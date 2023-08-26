@@ -175,28 +175,8 @@ class KanaWordDict:
         return candidate, fullmatch
 
 
-class Jp_SpellingObserver:
-    def __init__(self):
-        self.kwd = KanaWordDict()
-        self.queue = []
 
-    def input(self,key_obj):
-        self.queue.append(key_obj)
-        q = [k.raw for k in self.queue]
-        q = ''.join(q)
-        print(q)
 
-        l = [k.label for k in self.queue]
-        l = ''.join(l)
-        print(l)
-
-#        exist,val = self._check(q)
-#        if exist:
-#            print("spell found------------")
-#            val = KeyObj(val,l)
-#            return val
-#        else:
-#            return key_obj
 
 class Eng_SpellingObserver:
     def __init__(self):
@@ -218,7 +198,6 @@ class Eng_SpellingObserver:
         exist,val = self._check(q)
         if exist:
             print("spell found------------")
-            val = KeyObj(val,val)
             return val
         else:
             return key_obj
@@ -228,10 +207,6 @@ class Eng_SpellingObserver:
 
 
 
-class KeyObj:
-    def __init__(self,raw,label):
-        self.raw = raw
-        self.label = label
 
 class JpDecoder:
     def __init__(self):
@@ -273,16 +248,16 @@ class JpDecoder:
         return label
 
     def do(self,keyname,shift=False):
-        val = self._exchange(keyname,shift)
-        label = self._get_label(val)
-        return KeyObj(val,label)
+        midkey = self._exchange(keyname,shift)
+        label = self._get_label(midkey)
+        return label
 
 class EngDecoder:
     def __init__(self):
         pass
 
     def do(self,keyname,shift=False):
-        return KeyObj(keyname,keyname)
+        return keyname,keyname
 
 
 
@@ -302,6 +277,8 @@ class GameLoop:
 
         self.key_decoder = EngDecoder()
         self.spo = Eng_SpellingObserver()
+
+        self.spell = ""
 
     def _halt(self):
         pygame.quit()
@@ -326,7 +303,7 @@ class GameLoop:
         if self.mode == Mode.ENGLISH:
             self.mode = Mode.JAPANESE
             self.key_decoder = JpDecoder()
-            self.spo = Jp_SpellingObserver()
+            self.kwd = KanaWordDict()
         elif self.mode == Mode.JAPANESE:
             self.mode = Mode.ENGLISH
             self.key_decoder = EngDecoder()
@@ -341,7 +318,6 @@ class GameLoop:
                                 )
             DISPLAYSURF.blit(self.textSurfaceObj, self.textRectObj)
 
-            key_obj = KeyObj("","")
             keyname,shift = self.input_key()
 
             if keyname is None:
@@ -351,14 +327,22 @@ class GameLoop:
                     print("mode change")
                     self.change_mode()
                 else:
-                    key_obj = self.key_decoder.do(keyname, shift)
+                    label = self.key_decoder.do(keyname, shift)
+                    self.spell += label
 
                     self.sp.play(keyname)
                     self.fontd.change(keyname,self.mode)
 
-            if len(key_obj.raw) > 0:
-                key_obj = self.spo.input(key_obj)
-                #print(key_obj.raw)
+            if keyname is None:
+                pass
+            else:
+                #print(f"now = {self.spell}")
+                candidate, fullmatch = self.kwd.get_candidate(self.spell)
+                if candidate:
+                    for i,c in enumerate(candidate):
+                        print(f" candidate[{i}]:{c}")
+                if fullmatch:
+                    print(f"fullmatch:{fullmatch}")
 
             self.fontd.draw()
             #pygame.display.update()
