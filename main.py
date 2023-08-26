@@ -75,22 +75,27 @@ class KanaFont:
 
 
 class FontDisplay:
-    def __init__(self):
-        self.mode = Mode.ENGLISH
-        self.font_gen = AlphabetFont()
+    def __init__(self,char="こんにちは"):
+        self.font = pygame.font.SysFont('yugothicuisemibold', 70)
+        self.charSurfaceObj = self.font.render(char, True, GREEN, BLUE)
+        self.charRectObj = self.charSurfaceObj.get_rect()
+        self.charRectObj.center = (300, 300)
 
-    def change(self,char,mode):
+    def change(self,char):
         self.char = char
-        self.mode = mode
 
-        if self.mode == Mode.ENGLISH:
-            self.font_gen = AlphabetFont()
-        elif self.mode == Mode.JAPANESE:
-            self.font_gen = KanaFont()
-        self.font_gen.change(char)
+        self.charSurfaceObj = self.font.render(f"{self.char}", True, GREEN, BLUE)
+        self.charRectObj = self.charSurfaceObj.get_rect()
+        self.charRectObj.center = (300, 300)
+
+    #    font = pygame.font.SysFont('yugothicuisemibold', 70)
+#    kanji = font.render(f"{label}", True, (0, 0, 0))
+
+
 
     def draw(self):
-        self.font_gen.blit()
+        DISPLAYSURF.blit(self.charSurfaceObj,self.charRectObj)
+        #self.font_gen.blit()
 
 
 class Mode(Enum):
@@ -329,7 +334,7 @@ class GameLoop:
                     print(f"now = {self.spell}")
 
                     self.sp.play(keyname)
-                    self.fontd.change(keyname,self.mode)
+                    self.fontd.change(keyname)
 
                     candidate, fullmatch = self.wd.get_candidate(self.spell)
                     if len(candidate) > 0:
@@ -347,8 +352,8 @@ class GameLoop:
 if __name__ == '__main__':
     pygame.init()
     flags = pygame.FULLSCREEN
-    DISPLAYSURF = pygame.display.set_mode(size=(640,480), display=0, depth=32, flags=pygame.FULLSCREEN)
-    #DISPLAYSURF = pygame.display.set_mode(size=(640,480), display=0, depth=32)
+    #DISPLAYSURF = pygame.display.set_mode(size=(640,480), display=0, depth=32, flags=pygame.FULLSCREEN)
+    DISPLAYSURF = pygame.display.set_mode(size=(640,480), display=0, depth=32)
     pygame.display.set_caption('Hit any key')
 
     clock = pygame.time.Clock()
