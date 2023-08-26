@@ -27,11 +27,12 @@ class DakutenFixer:
             # print(f"{b}゜,{a},{bcode},{acode}")
             handakuten.append((bcode,acode))
         self.tr_table = dakuten + handakuten
+        
     def fix(self,text):
         text = text.encode('cp932')
         for b, a in self.tr_table:
             text = re.sub(b, a, text)
-        return text
+        return text.decode('cp932')
 
 
 class JpDecoder:
@@ -71,10 +72,22 @@ class JpDecoder:
         return False,''
 
 
+class KanaWord:
+    def __init__(self):
+        with open("kana-dict.txt","r") as fp:
+            self.words = [l.rstrip() for l in fp.readlines()]
+    def match(self,text):
+        pat = re.compile(text)
+        for w in self.words:
+            if re.match(pat,w):
+                print(w)
+
 
 def mainloop():
     decoder = JpDecoder()
     df = DakutenFixer()
+    
+    kw = KanaWord()
 
     spell = ""
     while True:
@@ -91,8 +104,9 @@ def mainloop():
             if flag:
                 spell += label
                 print(f"spell:{spell}")
-                label = df.fix(spell)
-                print(f"spell:{label.decode('cp932')}")
+                spell = df.fix(spell)
+                print(f"spell:{spell}")
+                kw.match(spell)
 
 
 
