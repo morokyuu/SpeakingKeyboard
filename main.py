@@ -11,6 +11,7 @@ import os
 import time
 import glob
 from enum import Enum
+import re
 
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 123)
@@ -157,18 +158,27 @@ class SoundPlayer:
             play_effect_kotsu()
 
 
+class KanaWordDict:
+    def __init__(self):
+        with open("kana-dict.txt", "r") as fp:
+            self.words = [l.rstrip() for l in fp.readlines()]
+
+    def get_candidate(self, text):
+        candidate = []
+        fullmatch = ""
+        pat = re.compile(text)
+        for w in self.words:
+            if re.match(pat, w):
+                candidate.append(w)
+            if re.fullmatch(pat, w):
+                fullmatch = w
+        return candidate, fullmatch
+
+
 class Jp_SpellingObserver:
     def __init__(self):
-        #self.kana_spell = [["na","su"],["a","sa","ga","o"]]
-        self.kana_spell = ["ka:su","nasu","asaka:o","tikatetu","ha0inaxtuhu0ru"]
+        self.kwd = KanaWordDict()
         self.queue = []
-
-    def _check(self,queue):
-        for sp in self.kana_spell:
-            if sp in queue:
-                self.queue.clear()
-                return True,sp
-        return False,None
 
     def input(self,key_obj):
         self.queue.append(key_obj)
@@ -180,13 +190,13 @@ class Jp_SpellingObserver:
         l = ''.join(l)
         print(l)
 
-        exist,val = self._check(q)
-        if exist:
-            print("spell found------------")
-            val = KeyObj(val,l)
-            return val
-        else:
-            return key_obj
+#        exist,val = self._check(q)
+#        if exist:
+#            print("spell found------------")
+#            val = KeyObj(val,l)
+#            return val
+#        else:
+#            return key_obj
 
 class Eng_SpellingObserver:
     def __init__(self):
@@ -230,8 +240,8 @@ class JpDecoder:
                      'i': "ni", 'j': "ma", 'k': "no", 'l': "ri", 'm': "mo", 'n': "mi", 'o': "ra", 'p': "se", 'q': "ta",
                      'r': "su", 's': "to", 't': "ka", 'u': "na", 'v': "hi", 'w': "te", 'x': "sa", 'y': "nn", 'z': "tu",
                      ',': "ne", '-': "ho", '.': "ru", '/': "me", ':': "ke", ';': "re", ']': "mu", '^': "he",
-                     '\\': "ro", }
-        self.hatsuon = {'[':"0",'@':":",'z':"xtu",'7':"xya",'8':"xyu",'9':"xyo"}
+                     '\\': "ro", '@':"゛", '[':'゜'}
+        self.sokuon_youon= {'z':"xtu",'7':"xya",'8':"xyu",'9':"xyo"}
 
         self.kana_label = {
             'a': "あ", 'i': "い", 'u': "う", 'e': "え", 'o': "お", 'ka': "か", 'ki': "き", 'ku': "く", 'ke': "け", 'ko': "こ",
@@ -245,7 +255,7 @@ class JpDecoder:
     def _exchange(self,keyname,shift):
         if not "shift" in keyname and shift == True:
             try:
-                val = self.hatsuon[keyname]
+                val = self.sokuon_youon[keyname]
             except:
                 val = ""
         else:
@@ -348,10 +358,11 @@ class GameLoop:
 
             if len(key_obj.raw) > 0:
                 key_obj = self.spo.input(key_obj)
-                print(key_obj.raw)
+                #print(key_obj.raw)
 
             self.fontd.draw()
-            pygame.display.update()
+            #pygame.display.update()
+            pygame.display.flip()
 
 
 # Press the green button in the gutter to run the script.
@@ -362,8 +373,11 @@ if __name__ == '__main__':
     DISPLAYSURF = pygame.display.set_mode(size=(640,480), display=0, depth=32)
     pygame.display.set_caption('Hit any key')
 
+    clock = pygame.time.Clock()
+
     g = GameLoop()
     while True:
         g.do()
+        clock.tick(30)
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
