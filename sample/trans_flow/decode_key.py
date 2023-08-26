@@ -78,11 +78,17 @@ class KanaWord:
     def __init__(self):
         with open("kana-dict.txt","r") as fp:
             self.words = [l.rstrip() for l in fp.readlines()]
-    def match(self,text):
+            
+    def get_candidate(self,text):
+        candidate = []
+        fullmatch = ""
         pat = re.compile(text)
         for w in self.words:
+            if re.match(pat,w):
+                candidate.append(w)
             if re.fullmatch(pat,w):
-                print(w)
+                fullmatch = w
+        return candidate, fullmatch
 
 
 def mainloop():
@@ -108,8 +114,12 @@ def mainloop():
                 print(f"spell:{spell}")
                 spell = df.fix(spell)
                 print(f"spell:{spell}")
-                kw.match(spell)
-
+                candidate,fullmatch = kw.get_candidate(spell)
+                
+                for c in candidate:
+                    print(c)
+                if fullmatch:
+                    print(f"fullmatch = {fullmatch}")
 
 
 if __name__ == '__main__':
