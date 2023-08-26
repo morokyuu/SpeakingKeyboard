@@ -158,9 +158,10 @@ class SoundPlayer:
             play_effect_kotsu()
 
 
-class KanaWordDict:
-    def __init__(self):
-        with open("kana-dict.txt", "r") as fp:
+class WordDict:
+    def __init__(self,dict_filepath):
+        self.words = []
+        with open(dict_filepath, "r") as fp:
             self.words = [l.rstrip() for l in fp.readlines()]
 
     def get_candidate(self, text):
@@ -174,34 +175,13 @@ class KanaWordDict:
                 fullmatch = w
         return candidate, fullmatch
 
-
-
-
-
-class Eng_SpellingObserver:
+class KanaWordDict(WordDict):
     def __init__(self):
-        self.queue = []
-        self.spell = {"abc","hello","pig","money","book"}
+        super().__init__("kana-dict.txt")
 
-
-    def _check(self,q):
-        for sp in self.spell:
-            if sp in q:
-                self.queue.clear()
-                return True,sp
-        return False,None
-
-    def input(self,key_obj):
-        self.queue.append(key_obj)
-        q = [k.raw for k in self.queue]
-        q = ''.join(q)
-        exist,val = self._check(q)
-        if exist:
-            print("spell found------------")
-            return val
-        else:
-            return key_obj
-
+class EngWordDict(WordDict):
+    def __init__(self):
+        super().__init__("eng-dict.txt")
 
 
 
@@ -257,7 +237,7 @@ class EngDecoder:
         pass
 
     def do(self,keyname,shift=False):
-        return keyname,keyname
+        return keyname
 
 
 
@@ -276,7 +256,7 @@ class GameLoop:
         self.mode = Mode.ENGLISH
 
         self.key_decoder = EngDecoder()
-        self.spo = Eng_SpellingObserver()
+        self.wd = EngWordDict()
 
         self.spell = ""
 
@@ -303,11 +283,11 @@ class GameLoop:
         if self.mode == Mode.ENGLISH:
             self.mode = Mode.JAPANESE
             self.key_decoder = JpDecoder()
-            self.kwd = KanaWordDict()
+            self.wd = KanaWordDict()
         elif self.mode == Mode.JAPANESE:
             self.mode = Mode.ENGLISH
             self.key_decoder = EngDecoder()
-            self.spo = Eng_SpellingObserver()
+            self.wd = EngWordDict()
         self.sp.set_mode(self.mode)
 
     def do(self):
@@ -326,18 +306,20 @@ class GameLoop:
                 if keyname == 'space':
                     print("mode change")
                     self.change_mode()
+                    self.spell = ""
+                # return-key to reset spell
                 elif keyname == 'return':
                     print("========return")
                     self.spell = ""
                 else:
                     label = self.key_decoder.do(keyname, shift)
                     self.spell += label
+                    print(f"now = {self.spell}")
 
                     self.sp.play(keyname)
                     self.fontd.change(keyname,self.mode)
 
-                    print(f"now = {self.spell}")
-                    candidate, fullmatch = self.kwd.get_candidate(self.spell)
+                    candidate, fullmatch = self.wd.get_candidate(self.spell)
                     if len(candidate) > 0:
                         for i,c in enumerate(candidate):
                             print(f" candidate[{i}]:{c}")
