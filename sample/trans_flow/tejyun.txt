@@ -1,0 +1,8 @@
+cat moji-code-table.txt | sed -n 12,36p | awk 'NR%2==0{print $0}'
+
+python
+'|'.join("づでどばびぶべぼ")
+'|'.join("ぱぴぷぺぽゃゅょ")
+
+
+
