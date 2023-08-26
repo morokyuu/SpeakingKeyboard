@@ -5,6 +5,8 @@ import re
 ## keyboard input lib
 ## https://dntf.hatenablog.com/entry/py_keyboard_lib
 
+## re  match fullmatch
+## https://docs.python.org/3/library/re.html
 
 class DakutenFixer:
     # result = re.sub(b'\x82\xcd\x81K', b'\x82\xcf', code)
@@ -79,7 +81,7 @@ class KanaWord:
     def match(self,text):
         pat = re.compile(text)
         for w in self.words:
-            if re.match(pat,w):
+            if re.fullmatch(pat,w):
                 print(w)
 
 
