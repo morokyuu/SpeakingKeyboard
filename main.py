@@ -121,6 +121,14 @@ def load_kana_dict():
     return char_dict,num_dict
 
 
+def play_effect_modechange(mode):
+    if mode == Mode.JAPANESE:
+        sound = pygame.mixer.Sound("./wav/effect/an-nihongo-mode.mp3")
+        sound.play()
+    elif mode == Mode.ENGLISH:
+        sound = pygame.mixer.Sound("./wav/effect/an-english-mode.mp3")
+        sound.play()
+
 def play_effect_kotsu():
     sound = pygame.mixer.Sound("./wav/effect/kotsu.mp3")
     sound.play()
@@ -131,8 +139,7 @@ def play_effect_picon():
 
 class SoundPlayer:
     def __init__(self):
-        self.mp3dict = load_eng_dict()
-        #load_kana_dict()
+        pass
 
     def set_mode(self,mode):
         if mode == Mode.ENGLISH:
@@ -249,14 +256,18 @@ class GameLoop:
         self.textRectObj = self.textSurfaceObj.get_rect()
         self.textRectObj.center = (300, 150)
 
-        self.sp = SoundPlayer()
         play_effect_picon()
 
         self.fontd = FontDisplay()
-        self.mode = Mode.ENGLISH
 
-        self.key_decoder = EngDecoder()
-        self.wd = EngWordDict()
+        self.mode = Mode.JAPANESE
+        self.key_decoder = JpDecoder()
+        self.wd = KanaWordDict()
+
+        self.sp = SoundPlayer()
+        self.sp.set_mode(self.mode)
+
+        print(self.mode)
 
         self.spell = ""
 
@@ -280,15 +291,16 @@ class GameLoop:
         return keyname,shift
 
     def change_mode(self):
-        if self.mode == Mode.ENGLISH:
-            self.mode = Mode.JAPANESE
-            self.key_decoder = JpDecoder()
-            self.wd = KanaWordDict()
-        elif self.mode == Mode.JAPANESE:
+        if self.mode == Mode.JAPANESE:
             self.mode = Mode.ENGLISH
             self.key_decoder = EngDecoder()
             self.wd = EngWordDict()
+        elif self.mode == Mode.ENGLISH:
+            self.mode = Mode.JAPANESE
+            self.key_decoder = JpDecoder()
+            self.wd = KanaWordDict()
         self.sp.set_mode(self.mode)
+        play_effect_modechange(self.mode)
 
     def do(self):
         while True:
