@@ -336,7 +336,7 @@ class GameLoop:
             if keyname is None:
                 pass
             else:
-                #print(f"now = {self.spell}")
+                print(f"now = {self.spell}")
                 candidate, fullmatch = self.kwd.get_candidate(self.spell)
                 if candidate:
                     for i,c in enumerate(candidate):
