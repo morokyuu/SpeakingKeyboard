@@ -1,9 +1,8 @@
-# This is a sample Python script.
-import string
-
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
+##
+## required version
+##   python 3.10
+##   pygame 2.4.0
+##
 from pygame.locals import *
 import pygame
 import sys
@@ -12,10 +11,14 @@ import time
 import glob
 from enum import Enum
 import re
+import random
 
+BLACK = (0, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 123)
 WHITE = (255, 255, 255)
+
+WINDOWSIZE = (640,480)
 
 class AlphabetFont:
     def __init__(self,char="hello"):
@@ -94,8 +97,6 @@ class FontDisplay(Display):
         self.charRectObj = self.charSurfaceObj.get_rect()
         self.charRectObj.center = (300, 300)
 
-
-
 class SpellDisplay(Display):
     def __init__(self):
         super().__init__()
@@ -105,6 +106,45 @@ class SpellDisplay(Display):
         self.charRectObj = self.charSurfaceObj.get_rect()
         self.charRectObj.center = (300, 380)
 
+class CandidateDisplay():
+    def __init__(self):
+        self.cand_surflist = []
+
+    def setOneCandidate(self,candidate):
+        self.font = pygame.font.SysFont('yugothicuisemibold', 100)
+        fontsurf = self.font.render(f"{candidate[0]}", True, BLACK)
+        charRectObj = fontsurf.get_rect()
+        charRectObj.center = (WINDOWSIZE[0]/2,70)
+        self.cand_surflist.append((fontsurf, charRectObj))
+
+    def setSomeCandidate(self,candidate):
+        fontsize = int(80 * 1/len(candidate))
+        L,H = (10,WINDOWSIZE[0]-10)
+
+        randx = [random.randrange(L,H) for _ in range(len(candidate))]
+        self.font = pygame.font.SysFont('yugothicuisemibold', fontsize)
+
+        for i,c in enumerate(candidate):
+            x = randx[i]
+            fontsurf = self.font.render(f"{c}", True, BLACK)
+            charRectObj = fontsurf.get_rect()
+            charRectObj.center = (x, 20+i*13)
+            self.cand_surflist.append((fontsurf,charRectObj))
+
+    def change(self,candidate):
+        self.cand_surflist.clear()
+        if len(candidate) >= 2:
+            self.setSomeCandidate(candidate)
+        elif len(candidate) == 1:
+            self.setOneCandidate(candidate)
+        else:
+            return
+
+
+
+    def draw(self):
+        for surf,rect in self.cand_surflist:
+            DISPLAYSURF.blit(surf,rect)
 
 
 class Mode(Enum):
@@ -301,6 +341,7 @@ class GameLoop:
 
         self.fontd = FontDisplay()
         self.spelld = SpellDisplay()
+        self.candidated = CandidateDisplay()
 
         self.dakutenf = DakutenFixer()
 
@@ -352,6 +393,7 @@ class GameLoop:
             pygame.draw.polygon(DISPLAYSURF, GREEN,
                                 ((146, 0), (291, 106), (236, 277), (56, 277), (0, 106))
                                 )
+
             DISPLAYSURF.blit(self.textSurfaceObj, self.textRectObj)
 
             keyname,shift = self.input_key()
@@ -369,6 +411,11 @@ class GameLoop:
                     self.spell = ""
                     self.fontd.change("  ")
                     self.spelld.change(self.spell)
+                    self.candidated.change([])
+
+                    if self.fullmatch:
+                        print(f'===fullmatch {self.fullmatch} ===')
+                        play_effect_picon()
                 else:
                     label = self.key_decoder.do(keyname, shift)
                     self.spell += label
@@ -379,15 +426,17 @@ class GameLoop:
                     self.fontd.change(label)
                     self.spelld.change(self.spell)
 
-                    candidate, fullmatch = self.wd.get_candidate(self.spell)
+                    candidate, self.fullmatch = self.wd.get_candidate(self.spell)
                     if len(candidate) > 0:
                         for i,c in enumerate(candidate):
                             print(f" candidate[{i}]:{c}")
-                    if fullmatch:
-                        print(f"fullmatch:{fullmatch}")
+                    self.candidated.change(candidate)
+                    if self.fullmatch:
+                        print(f"fullmatch:{self.fullmatch}")
 
             self.fontd.draw()
             self.spelld.draw()
+            self.candidated.draw()
             pygame.display.flip()
 
 
@@ -395,9 +444,9 @@ class GameLoop:
 if __name__ == '__main__':
     pygame.init()
     flags = pygame.FULLSCREEN
-    #DISPLAYSURF = pygame.display.set_mode(size=(640,480), display=0, depth=32, flags=pygame.FULLSCREEN)
-    DISPLAYSURF = pygame.display.set_mode(size=(640,480), display=0, depth=32)
-    pygame.display.set_caption('Hit any key')
+    #DISPLAYSURF = pygame.display.set_mode(size=WINDOWSIZE, display=0, depth=32, flags=pygame.FULLSCREEN)
+    DISPLAYSURF = pygame.display.set_mode(size=WINDOWSIZE, display=0, depth=32)
+    pygame.display.set_caption('Speaking Keyboard')
 
     clock = pygame.time.Clock()
 
