@@ -115,11 +115,11 @@ class CandidateDisplay():
             fontsize = 10
             L,H = (10,WINDOWSIZE[0]-10)
         elif len(candidate) >= 2:
-            fontsize = 16
+            fontsize = 22
             L,H = (100,WINDOWSIZE[0]-100)
         else:
             fontsize = 50
-            L,H = (WINDOWSIZE[0] / 2 - 30, WINDOWSIZE[0] / 2 + 30)
+            L,H = (WINDOWSIZE[0] / 2 - 3, WINDOWSIZE[0] / 2 + 3)
         randx = [random.randrange(L,H) for _ in range(len(candidate))]
         self.font = pygame.font.SysFont('yugothicuisemibold', fontsize)
 
@@ -129,10 +129,8 @@ class CandidateDisplay():
             #fontsurf = self.font.render(f"{c}", True, GREEN, BLUE)
             fontsurf = self.font.render(f"{c}", True, BLACK)
             charRectObj = fontsurf.get_rect()
-            #x = random.randrange(10,WINDOWSIZE[0]-20)
 
-            charRectObj.center = (x, 20+i*10)
-            #charRectObj.center = (randx, 20+i*10)
+            charRectObj.center = (x, 20+i*13)
             self.candlist.append((fontsurf,charRectObj))
 
     def draw(self):
@@ -434,7 +432,7 @@ if __name__ == '__main__':
     flags = pygame.FULLSCREEN
     #DISPLAYSURF = pygame.display.set_mode(size=WINDOWSIZE, display=0, depth=32, flags=pygame.FULLSCREEN)
     DISPLAYSURF = pygame.display.set_mode(size=WINDOWSIZE, display=0, depth=32)
-    pygame.display.set_caption('Hit any key')
+    pygame.display.set_caption('Speaking Keyboard')
 
     clock = pygame.time.Clock()
 
