@@ -412,6 +412,10 @@ class GameLoop:
                     self.fontd.change("  ")
                     self.spelld.change(self.spell)
                     self.candidated.change([])
+
+                    if self.fullmatch:
+                        print(f'===fullmatch {self.fullmatch} ===')
+                        play_effect_picon()
                 else:
                     label = self.key_decoder.do(keyname, shift)
                     self.spell += label
@@ -422,13 +426,13 @@ class GameLoop:
                     self.fontd.change(label)
                     self.spelld.change(self.spell)
 
-                    candidate, fullmatch = self.wd.get_candidate(self.spell)
+                    candidate, self.fullmatch = self.wd.get_candidate(self.spell)
                     if len(candidate) > 0:
                         for i,c in enumerate(candidate):
                             print(f" candidate[{i}]:{c}")
                     self.candidated.change(candidate)
-                    if fullmatch:
-                        print(f"fullmatch:{fullmatch}")
+                    if self.fullmatch:
+                        print(f"fullmatch:{self.fullmatch}")
 
             self.fontd.draw()
             self.spelld.draw()
