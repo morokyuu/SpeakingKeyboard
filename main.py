@@ -12,6 +12,7 @@ import glob
 from enum import Enum
 import re
 
+BLACK = (0, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 123)
 WHITE = (255, 255, 255)
@@ -110,7 +111,8 @@ class CandidateDisplay():
     def change(self,candidate):
         self.candlist.clear()
         for i,c in enumerate(candidate):
-            fontsurf = self.font.render(f"{c}", True, GREEN, BLUE)
+            #fontsurf = self.font.render(f"{c}", True, GREEN, BLUE)
+            fontsurf = self.font.render(f"{c}", True, BLACK)
             charRectObj = fontsurf.get_rect()
             charRectObj.center = (300, 20+i*10)
             self.candlist.append((fontsurf,charRectObj))
@@ -118,8 +120,6 @@ class CandidateDisplay():
     def draw(self):
         for surf,rect in self.candlist:
             DISPLAYSURF.blit(surf,rect)
-        #DISPLAYSURF.blit(self.charSurfaceObj,(300,300),pygame.Rect(30,30,50,50))
-        #DISPLAYSURF.blit(self.kana_img, (300, 300), pygame.Rect(0, int(self.kana_num) * 70, 70, 70))
 
 
 class Mode(Enum):
@@ -385,6 +385,7 @@ class GameLoop:
                     self.spell = ""
                     self.fontd.change("  ")
                     self.spelld.change(self.spell)
+                    self.candidated.change([])
                 else:
                     label = self.key_decoder.do(keyname, shift)
                     self.spell += label
@@ -399,7 +400,7 @@ class GameLoop:
                     if len(candidate) > 0:
                         for i,c in enumerate(candidate):
                             print(f" candidate[{i}]:{c}")
-                        self.candidated.change(candidate)
+                    self.candidated.change(candidate)
                     if fullmatch:
                         print(f"fullmatch:{fullmatch}")
 
