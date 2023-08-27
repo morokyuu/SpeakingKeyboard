@@ -102,14 +102,24 @@ class SpellDisplay(Display):
         self.charRectObj = self.charSurfaceObj.get_rect()
         self.charRectObj.center = (300, 380)
 
-class CandidateDisplay(Display):
+class CandidateDisplay():
     def __init__(self):
-        super().__init__()
+        self.font = pygame.font.SysFont('yugothicuisemibold', 10)
+        self.candlist = []
 
     def change(self,candidate):
-        self.charSurfaceObj = self.font.render(f"{candidate}", True, GREEN, BLUE)
-        self.charRectObj = self.charSurfaceObj.get_rect()
-        self.charRectObj.center = (300, 380)
+        self.candlist.clear()
+        for i,c in enumerate(candidate):
+            fontsurf = self.font.render(f"{c}", True, GREEN, BLUE)
+            charRectObj = fontsurf.get_rect()
+            charRectObj.center = (300, 20+i*10)
+            self.candlist.append((fontsurf,charRectObj))
+
+    def draw(self):
+        for surf,rect in self.candlist:
+            DISPLAYSURF.blit(surf,rect)
+        #DISPLAYSURF.blit(self.charSurfaceObj,(300,300),pygame.Rect(30,30,50,50))
+        #DISPLAYSURF.blit(self.kana_img, (300, 300), pygame.Rect(0, int(self.kana_num) * 70, 70, 70))
 
 
 class Mode(Enum):
@@ -395,6 +405,7 @@ class GameLoop:
 
             self.fontd.draw()
             self.spelld.draw()
+            self.candidated.draw()
             pygame.display.flip()
 
 
