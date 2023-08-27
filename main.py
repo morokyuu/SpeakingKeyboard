@@ -1,9 +1,8 @@
-# This is a sample Python script.
-import string
-
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
+##
+## required version
+##   python 3.10
+##   pygame 2.4.0
+##
 from pygame.locals import *
 import pygame
 import sys
@@ -94,8 +93,6 @@ class FontDisplay(Display):
         self.charRectObj = self.charSurfaceObj.get_rect()
         self.charRectObj.center = (300, 300)
 
-
-
 class SpellDisplay(Display):
     def __init__(self):
         super().__init__()
@@ -105,6 +102,14 @@ class SpellDisplay(Display):
         self.charRectObj = self.charSurfaceObj.get_rect()
         self.charRectObj.center = (300, 380)
 
+class CandidateDisplay(Display):
+    def __init__(self):
+        super().__init__()
+
+    def change(self,candidate):
+        self.charSurfaceObj = self.font.render(f"{candidate}", True, GREEN, BLUE)
+        self.charRectObj = self.charSurfaceObj.get_rect()
+        self.charRectObj.center = (300, 380)
 
 
 class Mode(Enum):
@@ -301,6 +306,7 @@ class GameLoop:
 
         self.fontd = FontDisplay()
         self.spelld = SpellDisplay()
+        self.candidated = CandidateDisplay()
 
         self.dakutenf = DakutenFixer()
 
@@ -383,6 +389,7 @@ class GameLoop:
                     if len(candidate) > 0:
                         for i,c in enumerate(candidate):
                             print(f" candidate[{i}]:{c}")
+                        self.candidated.change(candidate)
                     if fullmatch:
                         print(f"fullmatch:{fullmatch}")
 
