@@ -108,33 +108,42 @@ class SpellDisplay(Display):
 
 class CandidateDisplay():
     def __init__(self):
-        self.candlist = []
+        self.cand_surflist = []
 
-    def change(self,candidate):
-        if len(candidate) > 5:
-            fontsize = 10
-            L,H = (10,WINDOWSIZE[0]-10)
-        elif len(candidate) >= 2:
-            fontsize = 22
-            L,H = (100,WINDOWSIZE[0]-100)
-        else:
-            fontsize = 50
-            L,H = (WINDOWSIZE[0] / 2 - 3, WINDOWSIZE[0] / 2 + 3)
+    def setOneCandidate(self,candidate):
+        self.font = pygame.font.SysFont('yugothicuisemibold', 100)
+        fontsurf = self.font.render(f"{candidate[0]}", True, BLACK)
+        charRectObj = fontsurf.get_rect()
+        charRectObj.center = (WINDOWSIZE[0]/2,70)
+        self.cand_surflist.append((fontsurf, charRectObj))
+
+    def setSomeCandidate(self,candidate):
+        fontsize = int(80 * 1/len(candidate))
+        L,H = (10,WINDOWSIZE[0]-10)
+
         randx = [random.randrange(L,H) for _ in range(len(candidate))]
         self.font = pygame.font.SysFont('yugothicuisemibold', fontsize)
 
-        self.candlist.clear()
         for i,c in enumerate(candidate):
             x = randx[i]
-            #fontsurf = self.font.render(f"{c}", True, GREEN, BLUE)
             fontsurf = self.font.render(f"{c}", True, BLACK)
             charRectObj = fontsurf.get_rect()
-
             charRectObj.center = (x, 20+i*13)
-            self.candlist.append((fontsurf,charRectObj))
+            self.cand_surflist.append((fontsurf,charRectObj))
+
+    def change(self,candidate):
+        self.cand_surflist.clear()
+        if len(candidate) >= 2:
+            self.setSomeCandidate(candidate)
+        elif len(candidate) == 1:
+            self.setOneCandidate(candidate)
+        else:
+            return
+
+
 
     def draw(self):
-        for surf,rect in self.candlist:
+        for surf,rect in self.cand_surflist:
             DISPLAYSURF.blit(surf,rect)
 
 
@@ -384,6 +393,7 @@ class GameLoop:
             pygame.draw.polygon(DISPLAYSURF, GREEN,
                                 ((146, 0), (291, 106), (236, 277), (56, 277), (0, 106))
                                 )
+
             DISPLAYSURF.blit(self.textSurfaceObj, self.textRectObj)
 
             keyname,shift = self.input_key()
