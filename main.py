@@ -216,7 +216,7 @@ class JpDecoder:
                      'i': "ni", 'j': "ma", 'k': "no", 'l': "ri", 'm': "mo", 'n': "mi", 'o': "ra", 'p': "se", 'q': "ta",
                      'r': "su", 's': "to", 't': "ka", 'u': "na", 'v': "hi", 'w': "te", 'x': "sa", 'y': "nn", 'z': "tu",
                      ',': "ne", '-': "ho", '.': "ru", '/': "me", ':': "ke", ';': "re", ']': "mu", '^': "he",
-                     '\\': "ro", '@':"゛", '[':'゜'}
+                     '\\': "ro", '@': ":", '[': '0'}
         self.sokuon_youon= {'z':"xtu",'7':"xya",'8':"xyu",'9':"xyo"}
 
         self.kana_label = {
@@ -261,6 +261,33 @@ class EngDecoder:
         return keyname
 
 
+class DakutenFixer:
+    # result = re.sub(b'\x82\xcd\x81K', b'\x82\xcf', code)
+    def __init__(self):
+        before = 'かきくけこさしすせそたちつてとはひふへほ'
+        after = 'がぎぐげござじずぜぞだぢづでどばびぶべぼ'
+        dakuten = []
+        for b, a in zip(before, after):
+            bcode = b.encode('cp932') + '゛'.encode('cp932')
+            acode = a.encode('cp932')
+            # print(f"{b}゛,{a},{bcode},{acode}")
+            dakuten.append((bcode, acode))
+
+        before = 'はひふへほ'
+        after = 'ぱぴぷぺぽ'
+        handakuten = []
+        for b, a in zip(before, after):
+            bcode = b.encode('cp932') + '゜'.encode('cp932')
+            acode = a.encode('cp932')
+            # print(f"{b}゜,{a},{bcode},{acode}")
+            handakuten.append((bcode, acode))
+        self.tr_table = dakuten + handakuten
+
+    def fix(self, text):
+        text = text.encode('cp932')
+        for b, a in self.tr_table:
+            text = re.sub(b, a, text)
+        return text.decode('cp932')
 
 
 class GameLoop:
@@ -274,6 +301,8 @@ class GameLoop:
 
         self.fontd = FontDisplay()
         self.spelld = SpellDisplay()
+
+        self.dakutenf = DakutenFixer()
 
         self.mode = Mode.JAPANESE
         self.key_decoder = JpDecoder()
@@ -343,6 +372,7 @@ class GameLoop:
                 else:
                     label = self.key_decoder.do(keyname, shift)
                     self.spell += label
+                    self.spell = self.dakutenf.fix(self.spell)
                     print(f"now = {self.spell}")
 
                     self.sp.play(keyname)
