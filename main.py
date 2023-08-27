@@ -74,23 +74,37 @@ class KanaFont:
             DISPLAYSURF.blit(self.kana_img,(300,300),pygame.Rect(0,int(self.kana_num)*70,70,70))
 
 
-class FontDisplay:
-    def __init__(self):
-        self.mode = Mode.ENGLISH
-        self.font_gen = AlphabetFont()
-
-    def change(self,char,mode):
-        self.char = char
-        self.mode = mode
-
-        if self.mode == Mode.ENGLISH:
-            self.font_gen = AlphabetFont()
-        elif self.mode == Mode.JAPANESE:
-            self.font_gen = KanaFont()
-        self.font_gen.change(char)
+class Display:
+    def __init__(self,char="こんにちは"):
+        self.font = pygame.font.SysFont('yugothicuisemibold', 70)
+        self.charSurfaceObj = self.font.render(char, True, GREEN, BLUE)
+        self.charRectObj = self.charSurfaceObj.get_rect()
+        self.charRectObj.center = (300, 300)
 
     def draw(self):
-        self.font_gen.blit()
+        DISPLAYSURF.blit(self.charSurfaceObj,self.charRectObj)
+
+
+class FontDisplay(Display):
+    def __init__(self):
+        super().__init__()
+
+    def change(self,char):
+        self.charSurfaceObj = self.font.render(f"{char}", True, GREEN, BLUE)
+        self.charRectObj = self.charSurfaceObj.get_rect()
+        self.charRectObj.center = (300, 300)
+
+
+
+class SpellDisplay(Display):
+    def __init__(self):
+        super().__init__()
+
+    def change(self,char):
+        self.charSurfaceObj = self.font.render(f"<{char}>", True, GREEN, BLUE)
+        self.charRectObj = self.charSurfaceObj.get_rect()
+        self.charRectObj.center = (300, 380)
+
 
 
 class Mode(Enum):
@@ -202,7 +216,7 @@ class JpDecoder:
                      'i': "ni", 'j': "ma", 'k': "no", 'l': "ri", 'm': "mo", 'n': "mi", 'o': "ra", 'p': "se", 'q': "ta",
                      'r': "su", 's': "to", 't': "ka", 'u': "na", 'v': "hi", 'w': "te", 'x': "sa", 'y': "nn", 'z': "tu",
                      ',': "ne", '-': "ho", '.': "ru", '/': "me", ':': "ke", ';': "re", ']': "mu", '^': "he",
-                     '\\': "ro", '@':"゛", '[':'゜'}
+                     '\\': "ro", '@': ":", '[': '0'}
         self.sokuon_youon= {'z':"xtu",'7':"xya",'8':"xyu",'9':"xyo"}
 
         self.kana_label = {
@@ -247,6 +261,33 @@ class EngDecoder:
         return keyname
 
 
+class DakutenFixer:
+    # result = re.sub(b'\x82\xcd\x81K', b'\x82\xcf', code)
+    def __init__(self):
+        before = 'かきくけこさしすせそたちつてとはひふへほ'
+        after = 'がぎぐげござじずぜぞだぢづでどばびぶべぼ'
+        dakuten = []
+        for b, a in zip(before, after):
+            bcode = b.encode('cp932') + '゛'.encode('cp932')
+            acode = a.encode('cp932')
+            # print(f"{b}゛,{a},{bcode},{acode}")
+            dakuten.append((bcode, acode))
+
+        before = 'はひふへほ'
+        after = 'ぱぴぷぺぽ'
+        handakuten = []
+        for b, a in zip(before, after):
+            bcode = b.encode('cp932') + '゜'.encode('cp932')
+            acode = a.encode('cp932')
+            # print(f"{b}゜,{a},{bcode},{acode}")
+            handakuten.append((bcode, acode))
+        self.tr_table = dakuten + handakuten
+
+    def fix(self, text):
+        text = text.encode('cp932')
+        for b, a in self.tr_table:
+            text = re.sub(b, a, text)
+        return text.decode('cp932')
 
 
 class GameLoop:
@@ -259,6 +300,9 @@ class GameLoop:
         play_effect_picon()
 
         self.fontd = FontDisplay()
+        self.spelld = SpellDisplay()
+
+        self.dakutenf = DakutenFixer()
 
         self.mode = Mode.JAPANESE
         self.key_decoder = JpDecoder()
@@ -323,13 +367,17 @@ class GameLoop:
                 elif keyname == 'return':
                     print("========return")
                     self.spell = ""
+                    self.fontd.change("  ")
+                    self.spelld.change(self.spell)
                 else:
                     label = self.key_decoder.do(keyname, shift)
                     self.spell += label
+                    self.spell = self.dakutenf.fix(self.spell)
                     print(f"now = {self.spell}")
 
                     self.sp.play(keyname)
-                    self.fontd.change(keyname,self.mode)
+                    self.fontd.change(label)
+                    self.spelld.change(self.spell)
 
                     candidate, fullmatch = self.wd.get_candidate(self.spell)
                     if len(candidate) > 0:
@@ -339,7 +387,7 @@ class GameLoop:
                         print(f"fullmatch:{fullmatch}")
 
             self.fontd.draw()
-            #pygame.display.update()
+            self.spelld.draw()
             pygame.display.flip()
 
 
@@ -347,8 +395,8 @@ class GameLoop:
 if __name__ == '__main__':
     pygame.init()
     flags = pygame.FULLSCREEN
-    DISPLAYSURF = pygame.display.set_mode(size=(640,480), display=0, depth=32, flags=pygame.FULLSCREEN)
-    #DISPLAYSURF = pygame.display.set_mode(size=(640,480), display=0, depth=32)
+    #DISPLAYSURF = pygame.display.set_mode(size=(640,480), display=0, depth=32, flags=pygame.FULLSCREEN)
+    DISPLAYSURF = pygame.display.set_mode(size=(640,480), display=0, depth=32)
     pygame.display.set_caption('Hit any key')
 
     clock = pygame.time.Clock()
