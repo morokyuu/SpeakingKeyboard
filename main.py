@@ -338,6 +338,8 @@ class GameLoop:
                 elif keyname == 'return':
                     print("========return")
                     self.spell = ""
+                    self.fontd.change("  ")
+                    self.spelld.change(self.spell)
                 else:
                     label = self.key_decoder.do(keyname, shift)
                     self.spell += label
