@@ -74,28 +74,37 @@ class KanaFont:
             DISPLAYSURF.blit(self.kana_img,(300,300),pygame.Rect(0,int(self.kana_num)*70,70,70))
 
 
-class FontDisplay:
+class Display:
     def __init__(self,char="こんにちは"):
         self.font = pygame.font.SysFont('yugothicuisemibold', 70)
         self.charSurfaceObj = self.font.render(char, True, GREEN, BLUE)
         self.charRectObj = self.charSurfaceObj.get_rect()
         self.charRectObj.center = (300, 300)
 
-    def change(self,char):
-        self.char = char
+    def draw(self):
+        DISPLAYSURF.blit(self.charSurfaceObj,self.charRectObj)
 
-        self.charSurfaceObj = self.font.render(f"{self.char}", True, GREEN, BLUE)
+
+class FontDisplay(Display):
+    def __init__(self):
+        super().__init__()
+
+    def change(self,char):
+        self.charSurfaceObj = self.font.render(f"{char}", True, GREEN, BLUE)
         self.charRectObj = self.charSurfaceObj.get_rect()
         self.charRectObj.center = (300, 300)
 
-    #    font = pygame.font.SysFont('yugothicuisemibold', 70)
-#    kanji = font.render(f"{label}", True, (0, 0, 0))
 
 
+class SpellDisplay(Display):
+    def __init__(self):
+        super().__init__()
 
-    def draw(self):
-        DISPLAYSURF.blit(self.charSurfaceObj,self.charRectObj)
-        #self.font_gen.blit()
+    def change(self,char):
+        self.charSurfaceObj = self.font.render(f"<{char}>", True, GREEN, BLUE)
+        self.charRectObj = self.charSurfaceObj.get_rect()
+        self.charRectObj.center = (300, 380)
+
 
 
 class Mode(Enum):
@@ -264,6 +273,7 @@ class GameLoop:
         play_effect_picon()
 
         self.fontd = FontDisplay()
+        self.spelld = SpellDisplay()
 
         self.mode = Mode.JAPANESE
         self.key_decoder = JpDecoder()
@@ -334,7 +344,8 @@ class GameLoop:
                     print(f"now = {self.spell}")
 
                     self.sp.play(keyname)
-                    self.fontd.change(keyname)
+                    self.fontd.change(label)
+                    self.spelld.change(self.spell)
 
                     candidate, fullmatch = self.wd.get_candidate(self.spell)
                     if len(candidate) > 0:
@@ -344,7 +355,7 @@ class GameLoop:
                         print(f"fullmatch:{fullmatch}")
 
             self.fontd.draw()
-            #pygame.display.update()
+            self.spelld.draw()
             pygame.display.flip()
 
 
