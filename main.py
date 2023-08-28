@@ -191,6 +191,11 @@ def play_effect_picon():
     sound = pygame.mixer.Sound("./wav/effect/picon.mp3")
     sound.play()
 
+def play_effect_pinpon():
+    sound = pygame.mixer.Sound("./wav/effect/pinpon.mp3")
+    sound.play()
+
+
 class SoundPlayer:
     def __init__(self):
         pass
@@ -415,7 +420,7 @@ class GameLoop:
 
                     if self.fullmatch:
                         print(f'===fullmatch {self.fullmatch} ===')
-                        play_effect_picon()
+                        play_effect_pinpon()
                 else:
                     label = self.key_decoder.do(keyname, shift)
                     self.spell += label
