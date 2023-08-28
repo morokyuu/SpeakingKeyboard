@@ -449,8 +449,8 @@ class GameLoop:
 if __name__ == '__main__':
     pygame.init()
     flags = pygame.FULLSCREEN
-    #DISPLAYSURF = pygame.display.set_mode(size=WINDOWSIZE, display=0, depth=32, flags=pygame.FULLSCREEN)
-    DISPLAYSURF = pygame.display.set_mode(size=WINDOWSIZE, display=0, depth=32)
+    DISPLAYSURF = pygame.display.set_mode(size=WINDOWSIZE, display=0, depth=32, flags=pygame.FULLSCREEN)
+    #DISPLAYSURF = pygame.display.set_mode(size=WINDOWSIZE, display=0, depth=32)
     pygame.display.set_caption('Speaking Keyboard')
 
     clock = pygame.time.Clock()
