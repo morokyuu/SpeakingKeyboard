@@ -14,5 +14,5 @@ print(lines)
 
 for msg in lines:
     output = gTTS(text=msg,lang='ja',slow=False)
-    output.save(f'kana-words/{msg}.mp3')
+    output.save(f'{msg}.mp3')
 
