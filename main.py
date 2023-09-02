@@ -202,6 +202,9 @@ def play_word(word):
     except:
         pass
 
+def play_effect_pinpon():
+    sound = pygame.mixer.Sound("./wav/effect/pinpon.mp3")
+    sound.play()
 
 
 class SoundPlayer:
@@ -429,6 +432,7 @@ class GameLoop:
                     if self.fullmatch:
                         print(f'===fullmatch {self.fullmatch} ===')
                         play_word(self.fullmatch)
+                        play_effect_pinpon()
                 else:
                     label = self.key_decoder.do(keyname, shift)
                     self.spell += label
@@ -457,8 +461,8 @@ class GameLoop:
 if __name__ == '__main__':
     pygame.init()
     flags = pygame.FULLSCREEN
-    #DISPLAYSURF = pygame.display.set_mode(size=WINDOWSIZE, display=0, depth=32, flags=pygame.FULLSCREEN)
-    DISPLAYSURF = pygame.display.set_mode(size=WINDOWSIZE, display=0, depth=32)
+    DISPLAYSURF = pygame.display.set_mode(size=WINDOWSIZE, display=0, depth=32, flags=pygame.FULLSCREEN)
+    #DISPLAYSURF = pygame.display.set_mode(size=WINDOWSIZE, display=0, depth=32)
     pygame.display.set_caption('Speaking Keyboard')
 
     clock = pygame.time.Clock()
