@@ -191,6 +191,19 @@ def play_effect_picon():
     sound = pygame.mixer.Sound("./wav/effect/picon.mp3")
     sound.play()
 
+def play_word(word):
+    try:
+        sound = pygame.mixer.Sound(f"./wav/kana-words/{word}.mp3")
+        sound.play()
+        for _ in range(100):
+            time.sleep(0.05)
+            if not pygame.mixer.get_busy():
+                break
+    except:
+        pass
+
+
+
 class SoundPlayer:
     def __init__(self):
         pass
@@ -415,7 +428,7 @@ class GameLoop:
 
                     if self.fullmatch:
                         print(f'===fullmatch {self.fullmatch} ===')
-                        play_effect_picon()
+                        play_word(self.fullmatch)
                 else:
                     label = self.key_decoder.do(keyname, shift)
                     self.spell += label
