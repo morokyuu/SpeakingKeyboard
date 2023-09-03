@@ -433,6 +433,7 @@ class GameLoop:
                         print(f'===fullmatch {self.fullmatch} ===')
                         play_word(self.fullmatch)
                         play_effect_pinpon()
+                        self.fullmatch = None
                 else:
                     label = self.key_decoder.do(keyname, shift)
                     self.spell += label
