@@ -31,8 +31,6 @@ class AlphabetFont:
         if len(char) == 1:
             if char.islower():
                 char = char.upper()
-            char = " " + char + " "
-
         self.charSurfaceObj = self.fontObj.render(char, True, GREEN, BLUE)
         self.charRectObj = self.charSurfaceObj.get_rect()
         self.charRectObj.center = (300, 300)
@@ -313,8 +311,11 @@ class EngDecoder:
     def __init__(self):
         pass
 
-    def do(self,keyname,shift=False):
-        return keyname
+    def do(self,char,shift=False):
+        if len(char) == 1:
+            if char.islower():
+                char = char.upper()
+        return char
 
 
 class DakutenFixer:
