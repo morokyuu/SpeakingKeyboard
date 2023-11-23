@@ -96,11 +96,8 @@ class CandidateDisplay():
 
 class Mode(Enum):
     ENGLISH = 0,
-    HIRAGANA = 1
-
-class SubMode(Enum):
-    HIRAGANA = 0,
-    KATAKANA = 1
+    HIRAGANA = 1,
+    KATAKANA = 2
 
 def load_eng_dict():
     with open("eng_mode","r") as fp:
@@ -234,14 +231,14 @@ class JpDecoder:
                 'yo': "よ", 'ra': "ら", 'ri': "り", 'ru': "る", 're': "れ", 'ro': "ろ", 'wa': "わ", 'wo': "を", 'nn': "ん",
                 '0':"゜",':':"゛",'xtu':"っ",'xya':"ゃ",'xyu':"ゅ",'xyo':"ょ"
             }
-        else:
+        elif Mode.KATAKANA == mode:
             self.kana_label = {
-                'a': "ア", 'i': "い", 'u': "う", 'e': "え", 'o': "お", 'ka': "か", 'ki': "き", 'ku': "く", 'ke': "け", 'ko': "こ",
-                'sa': "さ", 'si': "し", 'su': "す", 'se': "せ", 'so': "そ", 'ta': "た", 'ti': "ち", 'tu': "つ", 'te': "て",
-                'to': "と", 'na': "な", 'ni': "に", 'nu': "ぬ", 'ne': "ね", 'no': "の", 'ha': "は", 'hi': "ひ", 'hu': "ふ",
-                'he': "へ", 'ho': "ほ", 'ma': "ま", 'mi': "み", 'mu': "む", 'me': "め", 'mo': "も", 'ya': "や", 'yu': "ゆ",
-                'yo': "よ", 'ra': "ら", 'ri': "り", 'ru': "る", 're': "れ", 'ro': "ろ", 'wa': "わ", 'wo': "を", 'nn': "ん",
-                '0':"゜",':':"゛",'xtu':"っ",'xya':"ゃ",'xyu':"ゅ",'xyo':"ょ"
+                'a': "ア", 'i': "イ", 'u': "ウ", 'e': "エ", 'o': "オ", 'ka': "カ", 'ki': "キ", 'ku': "ク", 'ke': "ケ", 'ko': "コ",
+                'sa': "サ", 'si': "シ", 'su': "ス", 'se': "セ", 'so': "ソ", 'ta': "タ", 'ti': "チ", 'tu': "ツ", 'te': "テ",
+                'to': "ト", 'na': "ナ", 'ni': "ニ", 'nu': "ヌ", 'ne': "ネ", 'no': "ノ", 'ha': "ハ", 'hi': "ヒ", 'hu': "フ",
+                'he': "ヘ", 'ho': "ホ", 'ma': "マ", 'mi': "ミ", 'mu': "ム", 'me': "メ", 'mo': "モ", 'ya': "ヤ", 'yu': "ユ",
+                'yo': "ヨ", 'ra': "ラ", 'ri': "リ", 'ru': "ル", 're': "レ", 'ro': "ロ", 'wa': "ワ", 'wo': "ヲ", 'nn': "ン",
+                '0':"゜",':':"゛",'xtu':"ッ",'xya':"ャ",'xyu':"ュ",'xyo':"ョ"
             }
 
     def _exchange(self,keyname,shift):
@@ -279,10 +276,14 @@ class EngDecoder:
 
 class DakutenFixer:
     # result = re.sub(b'\x82\xcd\x81K', b'\x82\xcf', code)
-    def __init__(self):
-        ##231123 カタカナモードの時にカタカナをロードさせる。ほかのロジックは共通に
-        before = 'かきくけこさしすせそたちつてとはひふへほ'
-        after = 'がぎぐげござじずぜぞだぢづでどばびぶべぼ'
+    def __init__(self,mode=Mode.HIRAGANA):
+        if mode == Mode.HIRAGANA:
+            before = 'かきくけこさしすせそたちつてとはひふへほ'
+            after = 'がぎぐげござじずぜぞだぢづでどばびぶべぼ'
+        else:
+            before = 'カキクケコサシスセソタチツテトハヒフヘホ'
+            after = 'ガギグゲゴザジズゼゾダヂヅデドバビブベボ'
+
         dakuten = []
         for b, a in zip(before, after):
             bcode = b.encode('cp932') + '゛'.encode('cp932')
@@ -290,8 +291,13 @@ class DakutenFixer:
             # print(f"{b}゛,{a},{bcode},{acode}")
             dakuten.append((bcode, acode))
 
-        before = 'はひふへほ'
-        after = 'ぱぴぷぺぽ'
+        if mode == Mode.HIRAGANA:
+            before = 'はひふへほ'
+            after = 'ぱぴぷぺぽ'
+        else:
+            before = 'ハヒフヘホ'
+            after = 'パピプペポ'
+
         handakuten = []
         for b, a in zip(before, after):
             bcode = b.encode('cp932') + '゜'.encode('cp932')
@@ -354,13 +360,13 @@ class GameLoop:
 
     def change_mode(self):
         if self.mode == Mode.HIRAGANA:
+            self.mode = Mode.KATAKANA
+            self.key_decoder = JpDecoder(Mode.KATAKANA)
+            self.wd = KanaWordDict()
+        elif self.mode == Mode.KATAKANA:
             self.mode = Mode.ENGLISH
             self.key_decoder = EngDecoder()
             self.wd = EngWordDict()
-        elif self.mode == Mode.KATAKANA:
-            self.mode = Mode.ENGLISH
-            self.key_decoder = JpDecoder(Mode.KATAKANA)
-            self.wd = KanaWordDict()
         elif self.mode == Mode.ENGLISH:
             self.mode = Mode.HIRAGANA
             self.key_decoder = JpDecoder(Mode.HIRAGANA)
