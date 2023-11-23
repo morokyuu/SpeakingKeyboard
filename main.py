@@ -21,60 +21,6 @@ WHITE = (255, 255, 255)
 
 WINDOWSIZE = (640,480)
 
-class AlphabetFont:
-    def __init__(self,char="hello"):
-        self.fontObj = pygame.font.Font('freesansbold.ttf', 130)
-        self.charSurfaceObj = self.fontObj.render(char, True, GREEN, BLUE)
-        self.charRectObj = self.charSurfaceObj.get_rect()
-        self.charRectObj.center = (300, 300)
-
-    def change(self,char):
-        if len(char) == 1:
-            if char.islower():
-                char = char.upper()
-        self.charSurfaceObj = self.fontObj.render(char, True, GREEN, BLUE)
-        self.charRectObj = self.charSurfaceObj.get_rect()
-        self.charRectObj.center = (300, 300)
-
-    def blit(self):
-        DISPLAYSURF.blit(self.charSurfaceObj, self.charRectObj)
-
-
-class KanaFont:
-    def __init__(self,char="kana mode"):
-        self.fontObj = pygame.font.Font('freesansbold.ttf', 130)
-        self.charSurfaceObj = self.fontObj.render(char, True, GREEN, BLUE)
-        self.charRectObj = self.charSurfaceObj.get_rect()
-        self.charRectObj.center = (300, 300)
-
-        self.kana_img = pygame.image.load("./font/kana_font.png").convert_alpha()
-        self.kana_dict,self.num_dict = load_kana_dict()
-        self.kana_num = 0
-
-    def change(self,char):
-        #print(f"{char} {type(char)} {len(char)}")
-        if len(char) == 1:
-            try:
-                if char == '\\':
-                    play_effect_kotsu()
-                    self.kana_num = -1
-                else:
-                    self.kana_num = int(self.num_dict[char])
-            except:
-                self.kana_num = -1
-        elif len(char) > 1:
-            play_effect_kotsu()
-            self.kana_num = -1
-        # len of char of RO-key is zero.
-        elif len(char) == 0:
-            self.kana_num = int(self.num_dict['\\'])
-
-    def blit(self):
-        if self.kana_num < 0:
-            pass
-        else:
-            DISPLAYSURF.blit(self.kana_img,(300,300),pygame.Rect(0,int(self.kana_num)*70,70,70))
-
 
 class Display:
     def __init__(self,char="こんにちは"):
@@ -150,8 +96,11 @@ class CandidateDisplay():
 
 class Mode(Enum):
     ENGLISH = 0,
-    JAPANESE = 1
+    HIRAGANA = 1
 
+class SubMode(Enum):
+    HIRAGANA = 0,
+    KATAKANA = 1
 
 def load_eng_dict():
     with open("eng_mode","r") as fp:
@@ -177,7 +126,7 @@ def load_kana_dict():
 
 
 def play_effect_modechange(mode):
-    if mode == Mode.JAPANESE:
+    if mode == Mode.HIRAGANA:
         sound = pygame.mixer.Sound("./wav/effect/an-nihongo-mode.mp3")
         sound.play()
     elif mode == Mode.ENGLISH:
@@ -215,7 +164,7 @@ class SoundPlayer:
     def set_mode(self,mode):
         if mode == Mode.ENGLISH:
             self.mp3dict = load_eng_dict()
-        elif mode == Mode.JAPANESE:
+        elif mode == Mode.HIRAGANA:
             self.mp3dict,_ = load_kana_dict()
         pass
 
@@ -267,7 +216,7 @@ class EngWordDict(WordDict):
 
 
 class JpDecoder:
-    def __init__(self):
+    def __init__(self,mode = Mode.HIRAGANA):
         self.kana = {'0': "wa", '1': "nu", '2': "hu", '3': "a", '4': "u", '5': "e", '6': "o", '7': "ya", '8': "yu",
                      '9': "yo", 'a': "ti", 'b': "ko", 'c': "so", 'd': "si", 'e': "i", 'f': "ha", 'g': "ki", 'h': "ku",
                      'i': "ni", 'j': "ma", 'k': "no", 'l': "ri", 'm': "mo", 'n': "mi", 'o': "ra", 'p': "se", 'q': "ta",
@@ -276,14 +225,24 @@ class JpDecoder:
                      '\\': "ro", '@': ":", '[': '0'}
         self.sokuon_youon= {'z':"xtu",'7':"xya",'8':"xyu",'9':"xyo"}
 
-        self.kana_label = {
-            'a': "あ", 'i': "い", 'u': "う", 'e': "え", 'o': "お", 'ka': "か", 'ki': "き", 'ku': "く", 'ke': "け", 'ko': "こ",
-            'sa': "さ", 'si': "し", 'su': "す", 'se': "せ", 'so': "そ", 'ta': "た", 'ti': "ち", 'tu': "つ", 'te': "て",
-            'to': "と", 'na': "な", 'ni': "に", 'nu': "ぬ", 'ne': "ね", 'no': "の", 'ha': "は", 'hi': "ひ", 'hu': "ふ",
-            'he': "へ", 'ho': "ほ", 'ma': "ま", 'mi': "み", 'mu': "む", 'me': "め", 'mo': "も", 'ya': "や", 'yu': "ゆ",
-            'yo': "よ", 'ra': "ら", 'ri': "り", 'ru': "る", 're': "れ", 'ro': "ろ", 'wa': "わ", 'wo': "を", 'nn': "ん",
-            '0':"゜",':':"゛",'xtu':"っ",'xya':"ゃ",'xyu':"ゅ",'xyo':"ょ"
-        }
+        if Mode.HIRAGANA == mode:
+            self.kana_label = {
+                'a': "あ", 'i': "い", 'u': "う", 'e': "え", 'o': "お", 'ka': "か", 'ki': "き", 'ku': "く", 'ke': "け", 'ko': "こ",
+                'sa': "さ", 'si': "し", 'su': "す", 'se': "せ", 'so': "そ", 'ta': "た", 'ti': "ち", 'tu': "つ", 'te': "て",
+                'to': "と", 'na': "な", 'ni': "に", 'nu': "ぬ", 'ne': "ね", 'no': "の", 'ha': "は", 'hi': "ひ", 'hu': "ふ",
+                'he': "へ", 'ho': "ほ", 'ma': "ま", 'mi': "み", 'mu': "む", 'me': "め", 'mo': "も", 'ya': "や", 'yu': "ゆ",
+                'yo': "よ", 'ra': "ら", 'ri': "り", 'ru': "る", 're': "れ", 'ro': "ろ", 'wa': "わ", 'wo': "を", 'nn': "ん",
+                '0':"゜",':':"゛",'xtu':"っ",'xya':"ゃ",'xyu':"ゅ",'xyo':"ょ"
+            }
+        else:
+            self.kana_label = {
+                'a': "ア", 'i': "い", 'u': "う", 'e': "え", 'o': "お", 'ka': "か", 'ki': "き", 'ku': "く", 'ke': "け", 'ko': "こ",
+                'sa': "さ", 'si': "し", 'su': "す", 'se': "せ", 'so': "そ", 'ta': "た", 'ti': "ち", 'tu': "つ", 'te': "て",
+                'to': "と", 'na': "な", 'ni': "に", 'nu': "ぬ", 'ne': "ね", 'no': "の", 'ha': "は", 'hi': "ひ", 'hu': "ふ",
+                'he': "へ", 'ho': "ほ", 'ma': "ま", 'mi': "み", 'mu': "む", 'me': "め", 'mo': "も", 'ya': "や", 'yu': "ゆ",
+                'yo': "よ", 'ra': "ら", 'ri': "り", 'ru': "る", 're': "れ", 'ro': "ろ", 'wa': "わ", 'wo': "を", 'nn': "ん",
+                '0':"゜",':':"゛",'xtu':"っ",'xya':"ゃ",'xyu':"ゅ",'xyo':"ょ"
+            }
 
     def _exchange(self,keyname,shift):
         if not "shift" in keyname and shift == True:
@@ -321,6 +280,7 @@ class EngDecoder:
 class DakutenFixer:
     # result = re.sub(b'\x82\xcd\x81K', b'\x82\xcf', code)
     def __init__(self):
+        ##231123 カタカナモードの時にカタカナをロードさせる。ほかのロジックは共通に
         before = 'かきくけこさしすせそたちつてとはひふへほ'
         after = 'がぎぐげござじずぜぞだぢづでどばびぶべぼ'
         dakuten = []
@@ -362,7 +322,7 @@ class GameLoop:
 
         self.dakutenf = DakutenFixer()
 
-        self.mode = Mode.JAPANESE
+        self.mode = Mode.HIRAGANA
         self.key_decoder = JpDecoder()
         self.wd = KanaWordDict()
 
@@ -393,13 +353,17 @@ class GameLoop:
         return keyname,shift
 
     def change_mode(self):
-        if self.mode == Mode.JAPANESE:
+        if self.mode == Mode.HIRAGANA:
             self.mode = Mode.ENGLISH
             self.key_decoder = EngDecoder()
             self.wd = EngWordDict()
+        elif self.mode == Mode.KATAKANA:
+            self.mode = Mode.ENGLISH
+            self.key_decoder = JpDecoder(Mode.KATAKANA)
+            self.wd = KanaWordDict()
         elif self.mode == Mode.ENGLISH:
-            self.mode = Mode.JAPANESE
-            self.key_decoder = JpDecoder()
+            self.mode = Mode.HIRAGANA
+            self.key_decoder = JpDecoder(Mode.HIRAGANA)
             self.wd = KanaWordDict()
         self.sp.set_mode(self.mode)
         play_effect_modechange(self.mode)
@@ -462,9 +426,9 @@ class GameLoop:
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     pygame.init()
-    flags = pygame.FULLSCREEN
-    DISPLAYSURF = pygame.display.set_mode(size=WINDOWSIZE, display=0, depth=32, flags=pygame.FULLSCREEN)
-    #DISPLAYSURF = pygame.display.set_mode(size=WINDOWSIZE, display=0, depth=32)
+    #flags = pygame.FULLSCREEN
+    #DISPLAYSURF = pygame.display.set_mode(size=WINDOWSIZE, display=0, depth=32, flags=pygame.FULLSCREEN)
+    DISPLAYSURF = pygame.display.set_mode(size=WINDOWSIZE, display=0, depth=32)
     pygame.display.set_caption('Speaking Keyboard')
 
     clock = pygame.time.Clock()
