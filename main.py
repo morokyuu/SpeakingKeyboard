@@ -277,12 +277,8 @@ class EngDecoder:
 class DakutenFixer:
     # result = re.sub(b'\x82\xcd\x81K', b'\x82\xcf', code)
     def __init__(self,mode=Mode.HIRAGANA):
-        if mode == Mode.HIRAGANA:
-            before = 'かきくけこさしすせそたちつてとはひふへほ'
-            after = 'がぎぐげござじずぜぞだぢづでどばびぶべぼ'
-        else:
-            before = 'カキクケコサシスセソタチツテトハヒフヘホ'
-            after = 'ガギグゲゴザジズゼゾダヂヅデドバビブベボ'
+        before = 'かきくけこさしすせそたちつてとはひふへほカキクケコサシスセソタチツテトハヒフヘホ'
+        after = 'がぎぐげござじずぜぞだぢづでどばびぶべぼガギグゲゴザジズゼゾダヂヅデドバビブベボ'
 
         dakuten = []
         for b, a in zip(before, after):
@@ -291,12 +287,8 @@ class DakutenFixer:
             # print(f"{b}゛,{a},{bcode},{acode}")
             dakuten.append((bcode, acode))
 
-        if mode == Mode.HIRAGANA:
-            before = 'はひふへほ'
-            after = 'ぱぴぷぺぽ'
-        else:
-            before = 'ハヒフヘホ'
-            after = 'パピプペポ'
+        before = 'はひふへほハヒフヘホ'
+        after = 'ぱぴぷぺぽパピプペポ'
 
         handakuten = []
         for b, a in zip(before, after):
