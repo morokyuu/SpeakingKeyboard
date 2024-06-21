@@ -434,6 +434,6 @@ if __name__ == '__main__':
     g = GameLoop()
     while True:
         g.do()
-        clock.tick(30)
+        clock.tick(15)
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
