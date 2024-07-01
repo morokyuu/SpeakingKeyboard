@@ -14,6 +14,8 @@ import re
 import random
 import string
 
+FULLSCREEN_MODE = True
+
 BLACK = (0, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 123)
@@ -154,7 +156,7 @@ def play_effect_pinpon():
     sound.play()
 
 
-class SoundPlayer:
+class MojiSoundPlayer:
     def __init__(self):
         pass
 
@@ -164,7 +166,6 @@ class SoundPlayer:
         elif mode == Mode.HIRAGANA:
             self.mp3dict,_ = load_kana_dict()
         pass
-
 
     def play(self,name):
         path = ""
@@ -324,7 +325,7 @@ class GameLoop:
         self.key_decoder = JpDecoder()
         self.wd = KanaWordDict()
 
-        self.sp = SoundPlayer()
+        self.sp = MojiSoundPlayer()
         self.sp.set_mode(self.mode)
 
         print(self.mode)
@@ -367,66 +368,62 @@ class GameLoop:
         play_effect_modechange(self.mode)
 
     def do(self):
-        while True:
-            DISPLAYSURF.fill(WHITE)
-            pygame.draw.polygon(DISPLAYSURF, GREEN,
-                                ((146, 0), (291, 106), (236, 277), (56, 277), (0, 106))
-                                )
+        DISPLAYSURF.fill(WHITE)
+        pygame.draw.polygon(DISPLAYSURF, GREEN,
+                            ((146, 0), (291, 106), (236, 277), (56, 277), (0, 106))
+                            )
+        DISPLAYSURF.blit(self.textSurfaceObj, self.textRectObj)
+        keyname,shift = self.input_key()
 
-            DISPLAYSURF.blit(self.textSurfaceObj, self.textRectObj)
+        if keyname is None:
+            pass
+        elif keyname == 'space':
+            print("mode change")
+            self.change_mode()
+            self.spell = ""
+        # return-key to reset spell
+        elif keyname == 'return':
+            print("========return")
+            self.spell = ""
+            self.fontd.change("  ")
+            self.spelld.change(self.spell)
+            self.candidated.change([])
 
-            keyname,shift = self.input_key()
+            if self.fullmatch:
+                print(f'===fullmatch {self.fullmatch} ===')
+                play_word(self.fullmatch)
+                play_effect_pinpon()
+                self.fullmatch = None
+        else:
+            label = self.key_decoder.do(keyname, shift)
+            self.spell += label
+            self.spell = self.dakutenf.fix(self.spell) #gengo izon no bubun ga rosyutushite shimatteiru
+            print(f"now = {self.spell}")
 
-            if keyname is None:
-                pass
-            else:
-                if keyname == 'space':
-                    print("mode change")
-                    self.change_mode()
-                    self.spell = ""
-                # return-key to reset spell
-                elif keyname == 'return':
-                    print("========return")
-                    self.spell = ""
-                    self.fontd.change("  ")
-                    self.spelld.change(self.spell)
-                    self.candidated.change([])
+            self.sp.play(keyname)
+            self.fontd.change(label)
+            self.spelld.change(self.spell)
 
-                    if self.fullmatch:
-                        print(f'===fullmatch {self.fullmatch} ===')
-                        play_word(self.fullmatch)
-                        play_effect_pinpon()
-                        self.fullmatch = None
-                else:
-                    label = self.key_decoder.do(keyname, shift)
-                    self.spell += label
-                    self.spell = self.dakutenf.fix(self.spell) #gengo izon no bubun ga rosyutushite shimatteiru
-                    print(f"now = {self.spell}")
+            candidate, self.fullmatch = self.wd.get_candidate(self.spell)
+            if len(candidate) > 0:
+                for i,c in enumerate(candidate):
+                    print(f" candidate[{i}]:{c}")
+            self.candidated.change(candidate)
+            if self.fullmatch:
+                print(f"fullmatch:{self.fullmatch}")
 
-                    self.sp.play(keyname)
-                    self.fontd.change(label)
-                    self.spelld.change(self.spell)
-
-                    candidate, self.fullmatch = self.wd.get_candidate(self.spell)
-                    if len(candidate) > 0:
-                        for i,c in enumerate(candidate):
-                            print(f" candidate[{i}]:{c}")
-                    self.candidated.change(candidate)
-                    if self.fullmatch:
-                        print(f"fullmatch:{self.fullmatch}")
-
-            self.fontd.draw()
-            self.spelld.draw()
-            self.candidated.draw()
-            pygame.display.flip()
+        self.fontd.draw()
+        self.spelld.draw()
+        self.candidated.draw()
 
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     pygame.init()
-    #flags = pygame.FULLSCREEN
-    #DISPLAYSURF = pygame.display.set_mode(size=WINDOWSIZE, display=0, depth=32, flags=pygame.FULLSCREEN)
-    DISPLAYSURF = pygame.display.set_mode(size=WINDOWSIZE, display=0, depth=32)
+    if FULLSCREEN_MODE:
+        DISPLAYSURF = pygame.display.set_mode(size=WINDOWSIZE, display=0, depth=32, flags=pygame.FULLSCREEN)
+    else:
+        DISPLAYSURF = pygame.display.set_mode(size=WINDOWSIZE, display=0, depth=32)
     pygame.display.set_caption('Speaking Keyboard')
 
     clock = pygame.time.Clock()
@@ -435,5 +432,6 @@ if __name__ == '__main__':
     while True:
         g.do()
         clock.tick(15)
+        pygame.display.flip()
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
