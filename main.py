@@ -14,7 +14,7 @@ import re
 import random
 import string
 
-FULLSCREEN_MODE = True
+FULLSCREEN_MODE = False
 
 BLACK = (0, 0, 0)
 GREEN = (0, 255, 0)
@@ -212,6 +212,62 @@ class EngWordDict(WordDict):
 
 
 
+class KeynameDecoder:
+    def __init__(self):
+        self.kana = {'0': "wa", '1': "nu", '2': "hu", '3': "a", '4': "u", '5': "e", '6': "o", '7': "ya", '8': "yu",
+                     '9': "yo", 'a': "ti", 'b': "ko", 'c': "so", 'd': "si", 'e': "i", 'f': "ha", 'g': "ki", 'h': "ku",
+                     'i': "ni", 'j': "ma", 'k': "no", 'l': "ri", 'm': "mo", 'n': "mi", 'o': "ra", 'p': "se", 'q': "ta",
+                     'r': "su", 's': "to", 't': "ka", 'u': "na", 'v': "hi", 'w': "te", 'x': "sa", 'y': "nn", 'z': "tu",
+                     ',': "ne", '-': "ho", '.': "ru", '/': "me", ':': "ke", ';': "re", ']': "mu", '^': "he",
+                     '\\': "ro", '@': ":", '[': '0'}
+        self.sokuon_youon= {'z':"xtu",'7':"xya",'8':"xyu",'9':"xyo"}
+
+        self.hiragana_label = {
+            'a': "あ", 'i': "い", 'u': "う", 'e': "え", 'o': "お", 'ka': "か", 'ki': "き", 'ku': "く", 'ke': "け", 'ko': "こ",
+            'sa': "さ", 'si': "し", 'su': "す", 'se': "せ", 'so': "そ", 'ta': "た", 'ti': "ち", 'tu': "つ", 'te': "て",
+            'to': "と", 'na': "な", 'ni': "に", 'nu': "ぬ", 'ne': "ね", 'no': "の", 'ha': "は", 'hi': "ひ", 'hu': "ふ",
+            'he': "へ", 'ho': "ほ", 'ma': "ま", 'mi': "み", 'mu': "む", 'me': "め", 'mo': "も", 'ya': "や", 'yu': "ゆ",
+            'yo': "よ", 'ra': "ら", 'ri': "り", 'ru': "る", 're': "れ", 'ro': "ろ", 'wa': "わ", 'wo': "を", 'nn': "ん",
+            '0':"゜",':':"゛",'xtu':"っ",'xya':"ゃ",'xyu':"ゅ",'xyo':"ょ"
+        }
+        self.katakana_label = {
+            'a': "ア", 'i': "イ", 'u': "ウ", 'e': "エ", 'o': "オ", 'ka': "カ", 'ki': "キ", 'ku': "ク", 'ke': "ケ", 'ko': "コ",
+            'sa': "サ", 'si': "シ", 'su': "ス", 'se': "セ", 'so': "ソ", 'ta': "タ", 'ti': "チ", 'tu': "ツ", 'te': "テ",
+            'to': "ト", 'na': "ナ", 'ni': "ニ", 'nu': "ヌ", 'ne': "ネ", 'no': "ノ", 'ha': "ハ", 'hi': "ヒ", 'hu': "フ",
+            'he': "ヘ", 'ho': "ホ", 'ma': "マ", 'mi': "ミ", 'mu': "ム", 'me': "メ", 'mo': "モ", 'ya': "ヤ", 'yu': "ユ",
+            'yo': "ヨ", 'ra': "ラ", 'ri': "リ", 'ru': "ル", 're': "レ", 'ro': "ロ", 'wa': "ワ", 'wo': "ヲ", 'nn': "ン",
+            '0':"゜",':':"゛",'xtu':"ッ",'xya':"ャ",'xyu':"ュ",'xyo':"ョ"
+        }
+
+    def decode_kana(self,keyname,shift,label_dict):
+        ## shift key
+        if not "shift" in keyname and shift == True:
+            ## with shift key
+            try:
+                val = self.sokuon_youon[keyname]
+            except:
+                val = ""
+        else:
+            ## without whift key
+            try:
+                val = self.kana[keyname]
+            except:
+                val = ""
+        ## label
+        try:
+            label = label_dict[val]
+        except:
+            label = ""
+        return label
+
+    def do(self,keyname,shift=False,mode=Mode.ENGLISH):
+        if mode==Mode.HIRAGANA:
+            label = self.decode_kana(keyname,shift,self.hiragana_label)
+        elif mode==Mode.KATAKANA:
+            label = self.decode_kana(keyname,shift,self.katakana_label)
+        else:
+            label = keyname
+        return label
 
 class JpDecoder:
     def __init__(self,mode = Mode.HIRAGANA):
@@ -395,6 +451,15 @@ class GameLoop:
                 play_effect_pinpon()
                 self.fullmatch = None
         else:
+
+            # debug
+            knd = KeynameDecoder()
+            self.mode = Mode.KATAKANA
+            label = knd.do(keyname, shift, self.mode)
+            print(label)
+
+            return
+
             label = self.key_decoder.do(keyname, shift)
             self.spell += label
             self.spell = self.dakutenf.fix(self.spell) #gengo izon no bubun ga rosyutushite shimatteiru
@@ -427,6 +492,7 @@ if __name__ == '__main__':
     pygame.display.set_caption('Speaking Keyboard')
 
     clock = pygame.time.Clock()
+
 
     g = GameLoop()
     while True:
