@@ -214,6 +214,7 @@ class EngWordDict(WordDict):
 
 class KeynameDecoder:
     def __init__(self):
+        # 仮名漢字入力モードの時に使う仮名キーの刻印に対応したローマ字読みに変換する
         self.kana = {'0': "wa", '1': "nu", '2': "hu", '3': "a", '4': "u", '5': "e", '6': "o", '7': "ya", '8': "yu",
                      '9': "yo", 'a': "ti", 'b': "ko", 'c': "so", 'd': "si", 'e': "i", 'f': "ha", 'g': "ki", 'h': "ku",
                      'i': "ni", 'j': "ma", 'k': "no", 'l': "ri", 'm': "mo", 'n': "mi", 'o': "ra", 'p': "se", 'q': "ta",
@@ -239,7 +240,7 @@ class KeynameDecoder:
             '0':"゜",':':"゛",'xtu':"ッ",'xya':"ャ",'xyu':"ュ",'xyo':"ョ"
         }
 
-    def decode_kana(self,keyname,shift,label_dict):
+    def keyname2romaji(self,keyname,shift):
         ## shift key
         if not "shift" in keyname and shift == True:
             ## with shift key
@@ -253,20 +254,26 @@ class KeynameDecoder:
                 val = self.kana[keyname]
             except:
                 val = ""
+        return val
+
+    def romaji2label(self,romaji,label_dict):
         ## label
         try:
-            label = label_dict[val]
+            label = label_dict[romaji]
         except:
             label = ""
         return label
 
     def do(self,keyname,shift=False,mode=Mode.ENGLISH):
-        if mode==Mode.HIRAGANA:
-            label = self.decode_kana(keyname,shift,self.hiragana_label)
-        elif mode==Mode.KATAKANA:
-            label = self.decode_kana(keyname,shift,self.katakana_label)
-        else:
+        label = ""
+        if mode==Mode.ENGLISH:
             label = keyname
+        else:
+            romaji = self.keyname2romaji(keyname, shift)
+            if mode==Mode.HIRAGANA:
+                label = self.romaji2label(romaji,self.hiragana_label)
+            elif mode==Mode.KATAKANA:
+                label = self.romaji2label(romaji,self.katakana_label)
         return label
 
 class JpDecoder:
