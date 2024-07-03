@@ -277,8 +277,9 @@ class KeynameDecoder:
     def do(self,keyname,shift=False,mode=Mode.ENGLISH):
         label = ""
         if mode==Mode.ENGLISH:
+            ## labelは小文字のままとし、表示するときに大文字小文字を好みで変更することにした
             label = keyname
-        else:
+        elif mode == Mode.HIRAGANA or mode == Mode.KATAKANA:
             romaji = self.keyname2romaji(keyname, shift)
             if mode==Mode.HIRAGANA:
                 label = self.romaji2label(romaji,self.hiragana_label)
