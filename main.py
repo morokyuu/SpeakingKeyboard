@@ -276,68 +276,6 @@ class KeynameDecoder:
                 label = self.romaji2label(romaji,self.katakana_label)
         return label
 
-class JpDecoder:
-    def __init__(self,mode = Mode.HIRAGANA):
-        self.kana = {'0': "wa", '1': "nu", '2': "hu", '3': "a", '4': "u", '5': "e", '6': "o", '7': "ya", '8': "yu",
-                     '9': "yo", 'a': "ti", 'b': "ko", 'c': "so", 'd': "si", 'e': "i", 'f': "ha", 'g': "ki", 'h': "ku",
-                     'i': "ni", 'j': "ma", 'k': "no", 'l': "ri", 'm': "mo", 'n': "mi", 'o': "ra", 'p': "se", 'q': "ta",
-                     'r': "su", 's': "to", 't': "ka", 'u': "na", 'v': "hi", 'w': "te", 'x': "sa", 'y': "nn", 'z': "tu",
-                     ',': "ne", '-': "ho", '.': "ru", '/': "me", ':': "ke", ';': "re", ']': "mu", '^': "he",
-                     '\\': "ro", '@': ":", '[': '0'}
-        self.sokuon_youon= {'z':"xtu",'7':"xya",'8':"xyu",'9':"xyo"}
-
-        if Mode.HIRAGANA == mode:
-            self.kana_label = {
-                'a': "あ", 'i': "い", 'u': "う", 'e': "え", 'o': "お", 'ka': "か", 'ki': "き", 'ku': "く", 'ke': "け", 'ko': "こ",
-                'sa': "さ", 'si': "し", 'su': "す", 'se': "せ", 'so': "そ", 'ta': "た", 'ti': "ち", 'tu': "つ", 'te': "て",
-                'to': "と", 'na': "な", 'ni': "に", 'nu': "ぬ", 'ne': "ね", 'no': "の", 'ha': "は", 'hi': "ひ", 'hu': "ふ",
-                'he': "へ", 'ho': "ほ", 'ma': "ま", 'mi': "み", 'mu': "む", 'me': "め", 'mo': "も", 'ya': "や", 'yu': "ゆ",
-                'yo': "よ", 'ra': "ら", 'ri': "り", 'ru': "る", 're': "れ", 'ro': "ろ", 'wa': "わ", 'wo': "を", 'nn': "ん",
-                '0':"゜",':':"゛",'xtu':"っ",'xya':"ゃ",'xyu':"ゅ",'xyo':"ょ"
-            }
-        elif Mode.KATAKANA == mode:
-            self.kana_label = {
-                'a': "ア", 'i': "イ", 'u': "ウ", 'e': "エ", 'o': "オ", 'ka': "カ", 'ki': "キ", 'ku': "ク", 'ke': "ケ", 'ko': "コ",
-                'sa': "サ", 'si': "シ", 'su': "ス", 'se': "セ", 'so': "ソ", 'ta': "タ", 'ti': "チ", 'tu': "ツ", 'te': "テ",
-                'to': "ト", 'na': "ナ", 'ni': "ニ", 'nu': "ヌ", 'ne': "ネ", 'no': "ノ", 'ha': "ハ", 'hi': "ヒ", 'hu': "フ",
-                'he': "ヘ", 'ho': "ホ", 'ma': "マ", 'mi': "ミ", 'mu': "ム", 'me': "メ", 'mo': "モ", 'ya': "ヤ", 'yu': "ユ",
-                'yo': "ヨ", 'ra': "ラ", 'ri': "リ", 'ru': "ル", 're': "レ", 'ro': "ロ", 'wa': "ワ", 'wo': "ヲ", 'nn': "ン",
-                '0':"゜",':':"゛",'xtu':"ッ",'xya':"ャ",'xyu':"ュ",'xyo':"ョ"
-            }
-
-    def _exchange(self,keyname,shift):
-        if not "shift" in keyname and shift == True:
-            try:
-                val = self.sokuon_youon[keyname]
-            except:
-                val = ""
-        else:
-            try:
-                val = self.kana[keyname]
-            except:
-                val = ""
-        return val
-
-    def _get_label(self,val):
-        try:
-            label = self.kana_label[val]
-        except:
-            label = ""
-        return label
-
-    def do(self,keyname,shift=False):
-        midkey = self._exchange(keyname,shift)
-        label = self._get_label(midkey)
-        return label
-
-class EngDecoder:
-    def __init__(self):
-        pass
-
-    def do(self,char,shift=False):
-        return char
-
-
 class DakutenFixer:
     # result = re.sub(b'\x82\xcd\x81K', b'\x82\xcf', code)
     def __init__(self,mode=Mode.HIRAGANA):
@@ -385,7 +323,7 @@ class GameLoop:
         self.dakutenf = DakutenFixer()
 
         self.mode = Mode.HIRAGANA
-        self.key_decoder = JpDecoder()
+        self.knd = KeynameDecoder()
         self.wd = KanaWordDict()
 
         self.sp = MojiSoundPlayer()
@@ -417,15 +355,12 @@ class GameLoop:
     def change_mode(self):
         if self.mode == Mode.HIRAGANA:
             self.mode = Mode.KATAKANA
-            self.key_decoder = JpDecoder(Mode.KATAKANA)
             self.wd = KanaWordDict()
         elif self.mode == Mode.KATAKANA:
             self.mode = Mode.ENGLISH
-            self.key_decoder = EngDecoder()
             self.wd = EngWordDict()
         elif self.mode == Mode.ENGLISH:
             self.mode = Mode.HIRAGANA
-            self.key_decoder = JpDecoder(Mode.HIRAGANA)
             self.wd = KanaWordDict()
         self.sp.set_mode(self.mode)
         play_effect_modechange(self.mode)
@@ -458,16 +393,8 @@ class GameLoop:
                 play_effect_pinpon()
                 self.fullmatch = None
         else:
+            label = self.knd.do(keyname, shift, self.mode)
 
-            # debug
-            knd = KeynameDecoder()
-            self.mode = Mode.KATAKANA
-            label = knd.do(keyname, shift, self.mode)
-            print(label)
-
-            return
-
-            label = self.key_decoder.do(keyname, shift)
             self.spell += label
             self.spell = self.dakutenf.fix(self.spell) #gengo izon no bubun ga rosyutushite shimatteiru
             print(f"now = {self.spell}")

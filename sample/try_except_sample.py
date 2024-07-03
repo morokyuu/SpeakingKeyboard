@@ -17,4 +17,4 @@ try:
     label = dct['b']
 finally:
     label = "なし"
-
+## exceptがないと、このまま例外が発生する
