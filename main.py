@@ -156,16 +156,6 @@ def play_effect_pinpon():
     sound.play()
 
 
-class SpellObserver:
-    def __init__(self):
-        self.prev_spell = []
-        pass
-    def monitor(self,spell):
-        if not spell == self.prev_spell:
-            print("spell buffer changed")
-        else:
-            pass
-        return
 
 class MojiSoundPlayer:
     def __init__(self):
@@ -331,8 +321,6 @@ class GameLoop:
         self.spelld = SpellDisplay()
         self.candidated = CandidateDisplay()
 
-        self.spell_ob = SpellObserver()
-
         self.dakutenf = DakutenFixer()
 
         self.mode = Mode.HIRAGANA
@@ -409,7 +397,6 @@ class GameLoop:
             label = self.knd.do(keyname, shift, self.mode)
 
             self.spell += label
-            self.spell_ob.monitor(self.spell)
 
             self.spell = self.dakutenf.fix(self.spell) #gengo izon no bubun ga rosyutushite shimatteiru
             print(f"now = {self.spell}")
