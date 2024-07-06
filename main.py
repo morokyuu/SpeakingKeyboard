@@ -262,7 +262,9 @@ class SpellBuffer:
         self.spell = ""
 
     def put(self,moji):
-        self.spell = self.dakuten.do(moji,self.spell)
+        print(f'moji={moji}')
+        self.spell = self.spell + moji
+        self.spell = self.dakuten.do(self.spell)
 
     def get(self):
         return self.spell
@@ -458,13 +460,13 @@ class GameLoop:
             self.fontd.change(label)
             self.spelld.change(self.spellbuf.get())
 
-            candidate, self.fullmatch = self.wd.get_candidate(self.spellbuf.get())
-            if len(candidate) > 0:
-                for i,c in enumerate(candidate):
-                    print(f" candidate[{i}]:{c}")
-            self.candidated.change(candidate)
-            if self.fullmatch:
-                print(f"fullmatch:{self.fullmatch}")
+#            candidate, self.fullmatch = self.wd.get_candidate(self.spellbuf.get())
+#            if len(candidate) > 0:
+#                for i,c in enumerate(candidate):
+#                    print(f" candidate[{i}]:{c}")
+#            self.candidated.change(candidate)
+#            if self.fullmatch:
+#                print(f"fullmatch:{self.fullmatch}")
 
         self.fontd.draw()
         self.spelld.draw()

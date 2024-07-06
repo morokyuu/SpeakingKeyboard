@@ -18,30 +18,22 @@ class DakutenHandler:
         self.replace_handaku = dict(zip(self.before_handaku,self.after_handaku))
         self.candidate = self.before_daku + self.before_handaku
         
-
-    def do(self,new_input,spell):
-        try:
-            lastmoji = spell[-1]
-        except IndexError:
-            return spell
+    # 濁点・半濁点に対応していない文字はそのまま素通りする
+    def do(self,spell):
         
-        print(lastmoji)
-        
-        if not lastmoji in self.candidate:
-            print(f"---the {new_input} is not used to {lastmoji}")
-            return spell
-        
-        elif new_input == '゛':
-            try:
-                spell = spell[:-1] + self.replace_daku[lastmoji]
-            except KeyError:
-                pass
-        
-        elif new_input == '゜':
-            try:
-                spell = spell[:-1] + self.replace_handaku[lastmoji]
-            except KeyError:
-                pass
+        if len(spell)>1:
+            new_input = spell[-1]
+            last_moji = spell[-2]
+            
+            if new_input in '゛':
+                if last_moji in self.candidate:
+                    spell = spell[:-2] + self.replace_daku[last_moji]
+            
+            elif new_input in '゜':
+                if last_moji in self.candidate:
+                    spell = spell[:-2] + self.replace_handaku[last_moji]
+        else:
+            pass
         
         return spell
 
@@ -51,54 +43,48 @@ dkt_handler = DakutenHandler()
 ## ------------------
 print(f'test1')
 
-spell = "ころんた"
-new_input = '゛'
+spell = "ころんた゛"
 
-modified = dkt_handler.do(new_input,spell)
+modified = dkt_handler.do(spell)
 print(f'{modified}')
 
 ## ------------------
 print(f'test2')
 
-spell = "はっは"
-new_input = '゜'
+spell = "はっは゜"
 
-modified = dkt_handler.do(new_input,spell)
+modified = dkt_handler.do(spell)
 print(f'{modified}')
 
 ## ------------------
 print(f'test3')
 
-spell = "しお"
-new_input = '゜'
+spell = "しお゜"
 
-modified = dkt_handler.do(new_input,spell)
+modified = dkt_handler.do(spell)
 print(f'{modified}')
 
 ## ------------------
 print(f'test4')
 
-spell = ""
-new_input = '゜'
+spell = "゜"
 
-modified = dkt_handler.do(new_input,spell)
+modified = dkt_handler.do(spell)
 print(f'{modified}')
 
 ## ------------------
 print(f'test5')
 
-spell = "゛゛"
-new_input = '゜'
+spell = "゛゛゜"
 
-modified = dkt_handler.do(new_input,spell)
+modified = dkt_handler.do(spell)
 print(f'{modified}')
 
 ## ------------------
 print(f'test6')
 
-spell = " "
-new_input = '゜'
+spell = " ゜"
 
-modified = dkt_handler.do(new_input,spell)
+modified = dkt_handler.do(spell)
 print(f'{modified}')
 
