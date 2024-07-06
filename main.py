@@ -55,6 +55,11 @@ class SpellDisplay(Display):
         self.charRectObj = self.charSurfaceObj.get_rect()
         self.charRectObj.center = (300, 380)
 
+    def clear(self):
+        self.charSurfaceObj = self.font.render(f"< >", True, GREEN, BLUE)
+        self.charRectObj = self.charSurfaceObj.get_rect()
+        self.charRectObj.center = (300, 380)
+
 class CandidateDisplay():
     def __init__(self):
         self.cand_surflist = []
@@ -210,7 +215,57 @@ class EngWordDict(WordDict):
         super().__init__("eng-dict.txt")
 
 
+class DakutenHandler:
+    def __init__(self):
+        ## dictitionary creation
+        ## https://note.nkmk.me/python-dict-create/
+        self.before_daku = 'かきくけこさしすせそたちつてとはひふへほカキクケコサシスセソタチツテトハヒフヘホ'
+        self.after_daku = 'がぎぐげござじずぜぞだぢづでどばびぶべぼガギグゲゴザジズゼゾダヂヅデドバビブベボ'
+        self.before_handaku = 'はひふへほハヒフヘホ'
+        self.after_handaku = 'ぱぴぷぺぽパピプペポ'
 
+        self.replace_daku = dict(zip(self.before_daku, self.after_daku))
+        self.replace_handaku = dict(zip(self.before_handaku, self.after_handaku))
+        self.candidate = self.before_daku + self.before_handaku
+
+    def do(self, new_input, spell):
+        try:
+            lastmoji = spell[-1]
+        except IndexError:
+            return spell
+        # print(lastmoji)
+
+        if not lastmoji in self.candidate:
+            print(f"---the {new_input} is not used to {lastmoji}")
+            return spell
+
+        elif new_input == '゛':
+            try:
+                spell = spell[:-1] + self.replace_daku[lastmoji]
+            except KeyError:
+                pass
+
+        elif new_input == '゜':
+            try:
+                spell = spell[:-1] + self.replace_handaku[lastmoji]
+            except KeyError:
+                pass
+
+        return spell
+
+class SpellBuffer:
+    def __init__(self):
+        self.spell = ""
+        self.dakuten = DakutenHandler()
+
+    def clear(self):
+        self.spell = ""
+
+    def put(self,moji):
+        self.spell = self.dakuten.do(moji,self.spell)
+
+    def get(self):
+        return self.spell
 
 class KeynameDecoder:
     def __init__(self):
@@ -321,18 +376,18 @@ class GameLoop:
         self.spelld = SpellDisplay()
         self.candidated = CandidateDisplay()
 
-        self.dakutenf = DakutenFixer()
 
         self.mode = Mode.HIRAGANA
         self.knd = KeynameDecoder()
-        self.wd = KanaWordDict()
 
+        self.spellbuf = SpellBuffer()
+
+        self.wd = KanaWordDict()
         self.sp = MojiSoundPlayer()
         self.sp.set_mode(self.mode)
 
         print(self.mode)
 
-        self.spell = ""
 
     def _halt(self):
         pygame.quit()
@@ -379,13 +434,13 @@ class GameLoop:
         elif keyname == 'space':
             print("mode change")
             self.change_mode()
-            self.spell = ""
+            self.spellbuf.clear()
         # return-key to reset spell
         elif keyname == 'return':
             print("========return")
-            self.spell = ""
+            self.spellbuf.clear()
             self.fontd.change("  ")
-            self.spelld.change(self.spell)
+            self.spelld.clear()
             self.candidated.change([])
 
             if self.fullmatch:
@@ -395,17 +450,15 @@ class GameLoop:
                 self.fullmatch = None
         else:
             label = self.knd.do(keyname, shift, self.mode)
+            self.spellbuf.put(label)
 
-            self.spell += label
-
-            self.spell = self.dakutenf.fix(self.spell) #gengo izon no bubun ga rosyutushite shimatteiru
-            print(f"now = {self.spell}")
+            print(f"now = {self.spellbuf.get()}")
 
             self.sp.play(keyname)
             self.fontd.change(label)
-            self.spelld.change(self.spell)
+            self.spelld.change(self.spellbuf.get())
 
-            candidate, self.fullmatch = self.wd.get_candidate(self.spell)
+            candidate, self.fullmatch = self.wd.get_candidate(self.spellbuf.get())
             if len(candidate) > 0:
                 for i,c in enumerate(candidate):
                     print(f" candidate[{i}]:{c}")
