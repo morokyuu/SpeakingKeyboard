@@ -5,7 +5,7 @@ Created on Sat Jul  6 22:19:32 2024
 @author: square
 """
 
-class DakutenHandler:
+class DakutenFilter:
     def __init__(self):
         ## dictitionary creation
         ## https://note.nkmk.me/python-dict-create/
@@ -16,7 +16,6 @@ class DakutenHandler:
         
         self.replace_daku    = dict(zip(self.before_daku,self.after_daku))
         self.replace_handaku = dict(zip(self.before_handaku,self.after_handaku))
-        self.candidate = self.before_daku + self.before_handaku
         
     # 濁点・半濁点に対応していない文字はそのまま素通りする
     def do(self,spell):
@@ -26,11 +25,11 @@ class DakutenHandler:
             last_moji = spell[-2]
             
             if new_input in '゛':
-                if last_moji in self.candidate:
+                if last_moji in self.before_daku:
                     spell = spell[:-2] + self.replace_daku[last_moji]
             
             elif new_input in '゜':
-                if last_moji in self.candidate:
+                if last_moji in self.before_handaku:
                     spell = spell[:-2] + self.replace_handaku[last_moji]
         else:
             pass
@@ -38,7 +37,7 @@ class DakutenHandler:
         return spell
 
 
-dkt_handler = DakutenHandler()
+dkt_handler = DakutenFilter()
 
 ## ------------------
 print(f'test1')

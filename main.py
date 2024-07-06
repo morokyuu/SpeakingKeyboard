@@ -215,7 +215,7 @@ class EngWordDict(WordDict):
         super().__init__("eng-dict.txt")
 
 
-class DakutenHandler:
+class DakutenFilter:
     def __init__(self):
         ## dictitionary creation
         ## https://note.nkmk.me/python-dict-create/
@@ -226,37 +226,30 @@ class DakutenHandler:
 
         self.replace_daku = dict(zip(self.before_daku, self.after_daku))
         self.replace_handaku = dict(zip(self.before_handaku, self.after_handaku))
-        self.candidate = self.before_daku + self.before_handaku
 
-    def do(self, new_input, spell):
-        try:
-            lastmoji = spell[-1]
-        except IndexError:
-            return spell
-        # print(lastmoji)
+    # 濁点・半濁点に対応していない文字はそのまま素通りする
+    def do(self, spell):
 
-        if not lastmoji in self.candidate:
-            print(f"---the {new_input} is not used to {lastmoji}")
-            return spell
+        if len(spell) > 1:
+            new_input = spell[-1]
+            last_moji = spell[-2]
 
-        elif new_input == '゛':
-            try:
-                spell = spell[:-1] + self.replace_daku[lastmoji]
-            except KeyError:
-                pass
+            if new_input in '゛':
+                if last_moji in self.before_daku:
+                    spell = spell[:-2] + self.replace_daku[last_moji]
 
-        elif new_input == '゜':
-            try:
-                spell = spell[:-1] + self.replace_handaku[lastmoji]
-            except KeyError:
-                pass
+            elif new_input in '゜':
+                if last_moji in self.before_handaku:
+                    spell = spell[:-2] + self.replace_handaku[last_moji]
+        else:
+            pass
 
         return spell
 
 class SpellBuffer:
     def __init__(self):
         self.spell = ""
-        self.dakuten = DakutenHandler()
+        self.dakuten = DakutenFilter()
 
     def clear(self):
         self.spell = ""
