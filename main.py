@@ -161,45 +161,22 @@ def play_effect_pinpon():
     sound.play()
 
 
-class MojiSoundPlayer2:
+class MojiSoundPlayer:
     def __init__(self):
         pass
-    def play(self,romaji):
-        romaji = romaji.upper()
-        path = f"wav//hiragana//{romaji}.mp3"
+    def play(self,romaji,mode):
+        path = ""
+        if mode == mode.HIRAGANA or mode == mode.KATAKANA:
+            romaji = romaji.upper()
+            path = f"wav//hiragana//{romaji}.mp3"
+        else:
+            path = f"wav//english//{romaji}.mp3"
         print(path)
 
         try:
             sound = pygame.mixer.Sound(path)
             sound.play()
         except FileNotFoundError:
-            play_effect_kotsu()
-        pass
-
-class MojiSoundPlayer:
-    def __init__(self):
-        pass
-
-    def set_mode(self,mode):
-        if mode == Mode.ENGLISH:
-            self.mp3dict = load_eng_dict()
-        elif mode == Mode.HIRAGANA:
-            self.mp3dict,_ = load_kana_dict()
-        pass
-
-    def play(self,name):
-        path = ""
-        try:
-            # len of char of RO-key is zero.
-            if len(name) == 0:
-                path = self.mp3dict['\\']
-            elif len(name) == 1 and name == '\\':
-                play_effect_kotsu()
-            else:
-                path = self.mp3dict[name]
-            sound = pygame.mixer.Sound(path)
-            sound.play()
-        except:
             play_effect_kotsu()
 
 
@@ -335,6 +312,7 @@ class KeynameDecoder:
         if mode==Mode.ENGLISH:
             ## labelは小文字のままとし、表示するときに大文字小文字を好みで変更することにした
             label = keyname
+            romaji = keyname
         elif mode == Mode.HIRAGANA or mode == Mode.KATAKANA:
             romaji = self.keyname2romaji(keyname, shift)
             if mode==Mode.HIRAGANA:
@@ -364,8 +342,7 @@ class GameLoop:
         self.spellbuf = SpellBuffer()
 
         self.wd = KanaWordDict()
-        self.sp2 = MojiSoundPlayer2()
-#        self.sp.set_mode(self.mode)
+        self.sp = MojiSoundPlayer()
 
         print(self.mode)
 
@@ -436,7 +413,7 @@ class GameLoop:
             print(f"romaji={romaji}, label={label}, spellbuf={self.spellbuf.get()}")
 
 #            self.sp.play(keyname)
-            self.sp2.play(romaji)
+            self.sp.play(romaji,self.mode)
             self.fontd.change(label)
             self.spelld.change(self.spellbuf.get())
 
