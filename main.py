@@ -311,8 +311,9 @@ class KeynameDecoder:
 
         if mode==Mode.ENGLISH:
             ## labelは小文字のままとし、表示するときに大文字小文字を好みで変更することにした
-            label = keyname
-            romaji = keyname
+            if keyname in string.ascii_letters + string.digits:
+                label = keyname
+                romaji = keyname
         elif mode == Mode.HIRAGANA or mode == Mode.KATAKANA:
             romaji = self.keyname2romaji(keyname, shift)
             if mode==Mode.HIRAGANA:
@@ -412,7 +413,6 @@ class GameLoop:
 
             print(f"romaji={romaji}, label={label}, spellbuf={self.spellbuf.get()}")
 
-#            self.sp.play(keyname)
             self.sp.play(romaji,self.mode)
             self.fontd.change(label)
             self.spelld.change(self.spellbuf.get())
