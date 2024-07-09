@@ -161,6 +161,20 @@ def play_effect_pinpon():
     sound.play()
 
 
+class MojiSoundPlayer2:
+    def __init__(self):
+        pass
+    def play(self,romaji):
+        romaji = romaji.upper()
+        path = f"wav//hiragana//{romaji}.mp3"
+        print(path)
+
+        try:
+            sound = pygame.mixer.Sound(path)
+            sound.play()
+        except FileNotFoundError:
+            play_effect_kotsu()
+        pass
 
 class MojiSoundPlayer:
     def __init__(self):
@@ -255,7 +269,6 @@ class SpellBuffer:
         self.spell = ""
 
     def put(self,moji):
-        print(f'moji={moji}')
         self.spell = self.spell + moji
         self.spell = self.dakuten.do(self.spell)
 
@@ -316,7 +329,9 @@ class KeynameDecoder:
         return label
 
     def do(self,keyname,shift=False,mode=Mode.ENGLISH):
+        romaji = ""
         label = ""
+
         if mode==Mode.ENGLISH:
             ## labelは小文字のままとし、表示するときに大文字小文字を好みで変更することにした
             label = keyname
@@ -326,7 +341,7 @@ class KeynameDecoder:
                 label = self.romaji2label(romaji,self.hiragana_label)
             elif mode==Mode.KATAKANA:
                 label = self.romaji2label(romaji,self.katakana_label)
-        return label
+        return romaji,label
 
 
 class GameLoop:
@@ -349,8 +364,8 @@ class GameLoop:
         self.spellbuf = SpellBuffer()
 
         self.wd = KanaWordDict()
-        self.sp = MojiSoundPlayer()
-        self.sp.set_mode(self.mode)
+        self.sp2 = MojiSoundPlayer2()
+#        self.sp.set_mode(self.mode)
 
         print(self.mode)
 
@@ -384,7 +399,7 @@ class GameLoop:
         elif self.mode == Mode.ENGLISH:
             self.mode = Mode.HIRAGANA
             self.wd = KanaWordDict()
-        self.sp.set_mode(self.mode)
+        #self.sp.set_mode(self.mode)
         play_effect_modechange(self.mode)
 
     def do(self):
@@ -415,12 +430,13 @@ class GameLoop:
                 play_effect_pinpon()
                 self.fullmatch = None
         else:
-            label = self.knd.do(keyname, shift, self.mode)
+            romaji,label = self.knd.do(keyname, shift, self.mode)
             self.spellbuf.put(label)
 
-            print(f"now = {self.spellbuf.get()}")
+            print(f"romaji={romaji}, label={label}, spellbuf={self.spellbuf.get()}")
 
-            self.sp.play(keyname)
+#            self.sp.play(keyname)
+            self.sp2.play(romaji)
             self.fontd.change(label)
             self.spelld.change(self.spellbuf.get())
 
