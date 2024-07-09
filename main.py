@@ -327,36 +327,6 @@ class KeynameDecoder:
                 label = self.romaji2label(romaji,self.katakana_label)
         return label
 
-class DakutenFixer:
-    # result = re.sub(b'\x82\xcd\x81K', b'\x82\xcf', code)
-    def __init__(self,mode=Mode.HIRAGANA):
-        before = 'かきくけこさしすせそたちつてとはひふへほカキクケコサシスセソタチツテトハヒフヘホ'
-        after = 'がぎぐげござじずぜぞだぢづでどばびぶべぼガギグゲゴザジズゼゾダヂヅデドバビブベボ'
-
-        dakuten = []
-        for b, a in zip(before, after):
-            bcode = b.encode('cp932') + '゛'.encode('cp932')
-            acode = a.encode('cp932')
-            # print(f"{b}゛,{a},{bcode},{acode}")
-            dakuten.append((bcode, acode))
-
-        before = 'はひふへほハヒフヘホ'
-        after = 'ぱぴぷぺぽパピプペポ'
-
-        handakuten = []
-        for b, a in zip(before, after):
-            bcode = b.encode('cp932') + '゜'.encode('cp932')
-            acode = a.encode('cp932')
-            # print(f"{b}゜,{a},{bcode},{acode}")
-            handakuten.append((bcode, acode))
-        self.tr_table = dakuten + handakuten
-
-    def fix(self, text):
-        text = text.encode('cp932')
-        for b, a in self.tr_table:
-            text = re.sub(b, a, text)
-        return text.decode('cp932')
-
 
 class GameLoop:
     def __init__(self):
@@ -453,13 +423,13 @@ class GameLoop:
             self.fontd.change(label)
             self.spelld.change(self.spellbuf.get())
 
-#            candidate, self.fullmatch = self.wd.get_candidate(self.spellbuf.get())
-#            if len(candidate) > 0:
-#                for i,c in enumerate(candidate):
-#                    print(f" candidate[{i}]:{c}")
-#            self.candidated.change(candidate)
-#            if self.fullmatch:
-#                print(f"fullmatch:{self.fullmatch}")
+            candidate, self.fullmatch = self.wd.get_candidate(self.spellbuf.get())
+            if len(candidate) > 0:
+                for i,c in enumerate(candidate):
+                    print(f" candidate[{i}]:{c}")
+            self.candidated.change(candidate)
+            if self.fullmatch:
+                print(f"fullmatch:{self.fullmatch}")
 
         self.fontd.draw()
         self.spelld.draw()
