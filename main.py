@@ -271,7 +271,7 @@ class KeynameDecoder:
                      'r': "su", 's': "to", 't': "ka", 'u': "na", 'v': "hi", 'w': "te", 'x': "sa", 'y': "nn", 'z': "tu",
                      ',': "ne", '-': "ho", '.': "ru", '/': "me", ':': "ke", ';': "re", ']': "mu", '^': "he",
                      '\\': "ro", '@': ":", '[': '0'}
-        self.sokuon_youon= {'z':"xtu",'7':"xya",'8':"xyu",'9':"xyo"}
+        self.sokuon_youon_nobashi= {'z':"xtu",'7':"xya",'8':"xyu",'9':"xyo",'-':"nobashi"}
 
         self.hiragana_label = {
             'a': "あ", 'i': "い", 'u': "う", 'e': "え", 'o': "お", 'ka': "か", 'ki': "き", 'ku': "く", 'ke': "け", 'ko': "こ",
@@ -279,7 +279,7 @@ class KeynameDecoder:
             'to': "と", 'na': "な", 'ni': "に", 'nu': "ぬ", 'ne': "ね", 'no': "の", 'ha': "は", 'hi': "ひ", 'hu': "ふ",
             'he': "へ", 'ho': "ほ", 'ma': "ま", 'mi': "み", 'mu': "む", 'me': "め", 'mo': "も", 'ya': "や", 'yu': "ゆ",
             'yo': "よ", 'ra': "ら", 'ri': "り", 'ru': "る", 're': "れ", 'ro': "ろ", 'wa': "わ", 'wo': "を", 'nn': "ん",
-            '0':"゜",':':"゛",'xtu':"っ",'xya':"ゃ",'xyu':"ゅ",'xyo':"ょ"
+            '0':"゜",':':"゛",'xtu':"っ",'xya':"ゃ",'xyu':"ゅ",'xyo':"ょ",'nobashi':"ー"
         }
         self.katakana_label = {
             'a': "ア", 'i': "イ", 'u': "ウ", 'e': "エ", 'o': "オ", 'ka': "カ", 'ki': "キ", 'ku': "ク", 'ke': "ケ", 'ko': "コ",
@@ -287,19 +287,20 @@ class KeynameDecoder:
             'to': "ト", 'na': "ナ", 'ni': "ニ", 'nu': "ヌ", 'ne': "ネ", 'no': "ノ", 'ha': "ハ", 'hi': "ヒ", 'hu': "フ",
             'he': "ヘ", 'ho': "ホ", 'ma': "マ", 'mi': "ミ", 'mu': "ム", 'me': "メ", 'mo': "モ", 'ya': "ヤ", 'yu': "ユ",
             'yo': "ヨ", 'ra': "ラ", 'ri': "リ", 'ru': "ル", 're': "レ", 'ro': "ロ", 'wa': "ワ", 'wo': "ヲ", 'nn': "ン",
-            '0':"゜",':':"゛",'xtu':"ッ",'xya':"ャ",'xyu':"ュ",'xyo':"ョ"
+            '0':"゜",':':"゛",'xtu':"ッ",'xya':"ャ",'xyu':"ュ",'xyo':"ョ",'nobashi':"ー"
         }
 
     def keyname2romaji(self,keyname,shift):
         ## shift key
         if not "shift" in keyname and shift == True:
-            ## with shift key
+            #print(f'keyname={keyname} shift={shift}')
+            ## with shift key (keyname='left shift' or 'right shift')
             try:
-                val = self.sokuon_youon[keyname]
+                val = self.sokuon_youon_nobashi[keyname]
             except:
                 val = ""
         else:
-            ## without whift key
+            ## without shift key
             try:
                 val = self.kana[keyname]
             except:
