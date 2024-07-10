@@ -14,7 +14,7 @@ import re
 import random
 import string
 
-FULLSCREEN_MODE = True
+FULLSCREEN_MODE = False
 
 BLACK = (0, 0, 0)
 GREEN = (0, 255, 0)
@@ -52,6 +52,11 @@ class SpellDisplay(Display):
 
     def change(self,char):
         self.charSurfaceObj = self.font.render(f"<{char}>", True, GREEN, BLUE)
+        self.charRectObj = self.charSurfaceObj.get_rect()
+        self.charRectObj.center = (300, 380)
+
+    def clear(self):
+        self.charSurfaceObj = self.font.render(f"< >", True, GREEN, BLUE)
         self.charRectObj = self.charSurfaceObj.get_rect()
         self.charRectObj.center = (300, 380)
 
@@ -159,27 +164,19 @@ def play_effect_pinpon():
 class MojiSoundPlayer:
     def __init__(self):
         pass
-
-    def set_mode(self,mode):
-        if mode == Mode.ENGLISH:
-            self.mp3dict = load_eng_dict()
-        elif mode == Mode.HIRAGANA:
-            self.mp3dict,_ = load_kana_dict()
-        pass
-
-    def play(self,name):
+    def play(self,romaji,mode):
         path = ""
+        if mode == mode.HIRAGANA or mode == mode.KATAKANA:
+            romaji = romaji.upper()
+            path = f"wav//hiragana//{romaji}.mp3"
+        else:
+            path = f"wav//english//{romaji}.mp3"
+        print(path)
+
         try:
-            # len of char of RO-key is zero.
-            if len(name) == 0:
-                path = self.mp3dict['\\']
-            elif len(name) == 1 and name == '\\':
-                play_effect_kotsu()
-            else:
-                path = self.mp3dict[name]
             sound = pygame.mixer.Sound(path)
             sound.play()
-        except:
+        except FileNotFoundError:
             play_effect_kotsu()
 
 
@@ -209,102 +206,121 @@ class EngWordDict(WordDict):
         super().__init__("eng-dict.txt")
 
 
+class DakutenFilter:
+    def __init__(self):
+        ## dictitionary creation
+        ## https://note.nkmk.me/python-dict-create/
+        self.before_daku = 'かきくけこさしすせそたちつてとはひふへほカキクケコサシスセソタチツテトハヒフヘホ'
+        self.after_daku = 'がぎぐげござじずぜぞだぢづでどばびぶべぼガギグゲゴザジズゼゾダヂヅデドバビブベボ'
+        self.before_handaku = 'はひふへほハヒフヘホ'
+        self.after_handaku = 'ぱぴぷぺぽパピプペポ'
 
+        self.replace_daku = dict(zip(self.before_daku, self.after_daku))
+        self.replace_handaku = dict(zip(self.before_handaku, self.after_handaku))
 
+    # 濁点・半濁点に対応していない文字はそのまま素通りする
+    def do(self, spell):
 
+        if len(spell) > 1:
+            new_input = spell[-1]
+            last_moji = spell[-2]
 
-class JpDecoder:
-    def __init__(self,mode = Mode.HIRAGANA):
+            if new_input in '゛':
+                if last_moji in self.before_daku:
+                    spell = spell[:-2] + self.replace_daku[last_moji]
+
+            elif new_input in '゜':
+                if last_moji in self.before_handaku:
+                    spell = spell[:-2] + self.replace_handaku[last_moji]
+        else:
+            pass
+
+        return spell
+
+class SpellBuffer:
+    def __init__(self):
+        self.spell = ""
+        self.dakuten = DakutenFilter()
+
+    def clear(self):
+        self.spell = ""
+
+    def put(self,moji):
+        self.spell = self.spell + moji
+        self.spell = self.dakuten.do(self.spell)
+
+    def get(self):
+        return self.spell
+
+class KeynameDecoder:
+    def __init__(self):
+        # 仮名漢字入力モードの時に使う仮名キーの刻印に対応したローマ字読みに変換する
         self.kana = {'0': "wa", '1': "nu", '2': "hu", '3': "a", '4': "u", '5': "e", '6': "o", '7': "ya", '8': "yu",
                      '9': "yo", 'a': "ti", 'b': "ko", 'c': "so", 'd': "si", 'e': "i", 'f': "ha", 'g': "ki", 'h': "ku",
                      'i': "ni", 'j': "ma", 'k': "no", 'l': "ri", 'm': "mo", 'n': "mi", 'o': "ra", 'p': "se", 'q': "ta",
                      'r': "su", 's': "to", 't': "ka", 'u': "na", 'v': "hi", 'w': "te", 'x': "sa", 'y': "nn", 'z': "tu",
                      ',': "ne", '-': "ho", '.': "ru", '/': "me", ':': "ke", ';': "re", ']': "mu", '^': "he",
                      '\\': "ro", '@': ":", '[': '0'}
-        self.sokuon_youon= {'z':"xtu",'7':"xya",'8':"xyu",'9':"xyo"}
+        self.sokuon_youon_nobashi= {'z':"xtu",'7':"xya",'8':"xyu",'9':"xyo",'-':"nobashi"}
 
-        if Mode.HIRAGANA == mode:
-            self.kana_label = {
-                'a': "あ", 'i': "い", 'u': "う", 'e': "え", 'o': "お", 'ka': "か", 'ki': "き", 'ku': "く", 'ke': "け", 'ko': "こ",
-                'sa': "さ", 'si': "し", 'su': "す", 'se': "せ", 'so': "そ", 'ta': "た", 'ti': "ち", 'tu': "つ", 'te': "て",
-                'to': "と", 'na': "な", 'ni': "に", 'nu': "ぬ", 'ne': "ね", 'no': "の", 'ha': "は", 'hi': "ひ", 'hu': "ふ",
-                'he': "へ", 'ho': "ほ", 'ma': "ま", 'mi': "み", 'mu': "む", 'me': "め", 'mo': "も", 'ya': "や", 'yu': "ゆ",
-                'yo': "よ", 'ra': "ら", 'ri': "り", 'ru': "る", 're': "れ", 'ro': "ろ", 'wa': "わ", 'wo': "を", 'nn': "ん",
-                '0':"゜",':':"゛",'xtu':"っ",'xya':"ゃ",'xyu':"ゅ",'xyo':"ょ"
-            }
-        elif Mode.KATAKANA == mode:
-            self.kana_label = {
-                'a': "ア", 'i': "イ", 'u': "ウ", 'e': "エ", 'o': "オ", 'ka': "カ", 'ki': "キ", 'ku': "ク", 'ke': "ケ", 'ko': "コ",
-                'sa': "サ", 'si': "シ", 'su': "ス", 'se': "セ", 'so': "ソ", 'ta': "タ", 'ti': "チ", 'tu': "ツ", 'te': "テ",
-                'to': "ト", 'na': "ナ", 'ni': "ニ", 'nu': "ヌ", 'ne': "ネ", 'no': "ノ", 'ha': "ハ", 'hi': "ヒ", 'hu': "フ",
-                'he': "ヘ", 'ho': "ホ", 'ma': "マ", 'mi': "ミ", 'mu': "ム", 'me': "メ", 'mo': "モ", 'ya': "ヤ", 'yu': "ユ",
-                'yo': "ヨ", 'ra': "ラ", 'ri': "リ", 'ru': "ル", 're': "レ", 'ro': "ロ", 'wa': "ワ", 'wo': "ヲ", 'nn': "ン",
-                '0':"゜",':':"゛",'xtu':"ッ",'xya':"ャ",'xyu':"ュ",'xyo':"ョ"
-            }
+        self.hiragana_label = {
+            'a': "あ", 'i': "い", 'u': "う", 'e': "え", 'o': "お", 'ka': "か", 'ki': "き", 'ku': "く", 'ke': "け", 'ko': "こ",
+            'sa': "さ", 'si': "し", 'su': "す", 'se': "せ", 'so': "そ", 'ta': "た", 'ti': "ち", 'tu': "つ", 'te': "て",
+            'to': "と", 'na': "な", 'ni': "に", 'nu': "ぬ", 'ne': "ね", 'no': "の", 'ha': "は", 'hi': "ひ", 'hu': "ふ",
+            'he': "へ", 'ho': "ほ", 'ma': "ま", 'mi': "み", 'mu': "む", 'me': "め", 'mo': "も", 'ya': "や", 'yu': "ゆ",
+            'yo': "よ", 'ra': "ら", 'ri': "り", 'ru': "る", 're': "れ", 'ro': "ろ", 'wa': "わ", 'wo': "を", 'nn': "ん",
+            '0':"゜",':':"゛",'xtu':"っ",'xya':"ゃ",'xyu':"ゅ",'xyo':"ょ",'nobashi':"ー"
+        }
+        self.katakana_label = {
+            'a': "ア", 'i': "イ", 'u': "ウ", 'e': "エ", 'o': "オ", 'ka': "カ", 'ki': "キ", 'ku': "ク", 'ke': "ケ", 'ko': "コ",
+            'sa': "サ", 'si': "シ", 'su': "ス", 'se': "セ", 'so': "ソ", 'ta': "タ", 'ti': "チ", 'tu': "ツ", 'te': "テ",
+            'to': "ト", 'na': "ナ", 'ni': "ニ", 'nu': "ヌ", 'ne': "ネ", 'no': "ノ", 'ha': "ハ", 'hi': "ヒ", 'hu': "フ",
+            'he': "ヘ", 'ho': "ホ", 'ma': "マ", 'mi': "ミ", 'mu': "ム", 'me': "メ", 'mo': "モ", 'ya': "ヤ", 'yu': "ユ",
+            'yo': "ヨ", 'ra': "ラ", 'ri': "リ", 'ru': "ル", 're': "レ", 'ro': "ロ", 'wa': "ワ", 'wo': "ヲ", 'nn': "ン",
+            '0':"゜",':':"゛",'xtu':"ッ",'xya':"ャ",'xyu':"ュ",'xyo':"ョ",'nobashi':"ー"
+        }
 
-    def _exchange(self,keyname,shift):
+    def keyname2romaji(self,keyname,shift):
+        ## shift key
         if not "shift" in keyname and shift == True:
+            #print(f'keyname={keyname} shift={shift}')
+            ## with shift key (keyname='left shift' or 'right shift')
             try:
-                val = self.sokuon_youon[keyname]
+                val = self.sokuon_youon_nobashi[keyname]
             except:
                 val = ""
         else:
+            ## without shift key
             try:
                 val = self.kana[keyname]
             except:
                 val = ""
         return val
 
-    def _get_label(self,val):
+    def romaji2label(self,romaji,label_dict):
+        ## label
         try:
-            label = self.kana_label[val]
+            label = label_dict[romaji]
         except:
             label = ""
         return label
 
-    def do(self,keyname,shift=False):
-        midkey = self._exchange(keyname,shift)
-        label = self._get_label(midkey)
-        return label
+    def do(self,keyname,shift=False,mode=Mode.ENGLISH):
+        romaji = ""
+        label = ""
 
-class EngDecoder:
-    def __init__(self):
-        pass
-
-    def do(self,char,shift=False):
-        return char
-
-
-class DakutenFixer:
-    # result = re.sub(b'\x82\xcd\x81K', b'\x82\xcf', code)
-    def __init__(self,mode=Mode.HIRAGANA):
-        before = 'かきくけこさしすせそたちつてとはひふへほカキクケコサシスセソタチツテトハヒフヘホ'
-        after = 'がぎぐげござじずぜぞだぢづでどばびぶべぼガギグゲゴザジズゼゾダヂヅデドバビブベボ'
-
-        dakuten = []
-        for b, a in zip(before, after):
-            bcode = b.encode('cp932') + '゛'.encode('cp932')
-            acode = a.encode('cp932')
-            # print(f"{b}゛,{a},{bcode},{acode}")
-            dakuten.append((bcode, acode))
-
-        before = 'はひふへほハヒフヘホ'
-        after = 'ぱぴぷぺぽパピプペポ'
-
-        handakuten = []
-        for b, a in zip(before, after):
-            bcode = b.encode('cp932') + '゜'.encode('cp932')
-            acode = a.encode('cp932')
-            # print(f"{b}゜,{a},{bcode},{acode}")
-            handakuten.append((bcode, acode))
-        self.tr_table = dakuten + handakuten
-
-    def fix(self, text):
-        text = text.encode('cp932')
-        for b, a in self.tr_table:
-            text = re.sub(b, a, text)
-        return text.decode('cp932')
-
+        if mode==Mode.ENGLISH:
+            ## labelは小文字のままとし、表示するときに大文字小文字を好みで変更することにした
+            if keyname in string.ascii_letters + string.digits:
+                label = keyname
+                romaji = keyname
+        elif mode == Mode.HIRAGANA or mode == Mode.KATAKANA:
+            romaji = self.keyname2romaji(keyname, shift)
+            if mode==Mode.HIRAGANA:
+                label = self.romaji2label(romaji,self.hiragana_label)
+            elif mode==Mode.KATAKANA:
+                label = self.romaji2label(romaji,self.katakana_label)
+        return romaji,label
 
 class GameLoop:
     def __init__(self):
@@ -319,18 +335,17 @@ class GameLoop:
         self.spelld = SpellDisplay()
         self.candidated = CandidateDisplay()
 
-        self.dakutenf = DakutenFixer()
 
         self.mode = Mode.HIRAGANA
-        self.key_decoder = JpDecoder()
-        self.wd = KanaWordDict()
+        self.knd = KeynameDecoder()
 
+        self.spellbuf = SpellBuffer()
+
+        self.wd = KanaWordDict()
         self.sp = MojiSoundPlayer()
-        self.sp.set_mode(self.mode)
 
         print(self.mode)
 
-        self.spell = ""
 
     def _halt(self):
         pygame.quit()
@@ -354,17 +369,14 @@ class GameLoop:
     def change_mode(self):
         if self.mode == Mode.HIRAGANA:
             self.mode = Mode.KATAKANA
-            self.key_decoder = JpDecoder(Mode.KATAKANA)
             self.wd = KanaWordDict()
         elif self.mode == Mode.KATAKANA:
             self.mode = Mode.ENGLISH
-            self.key_decoder = EngDecoder()
             self.wd = EngWordDict()
         elif self.mode == Mode.ENGLISH:
             self.mode = Mode.HIRAGANA
-            self.key_decoder = JpDecoder(Mode.HIRAGANA)
             self.wd = KanaWordDict()
-        self.sp.set_mode(self.mode)
+        #self.sp.set_mode(self.mode)
         play_effect_modechange(self.mode)
 
     def do(self):
@@ -380,13 +392,13 @@ class GameLoop:
         elif keyname == 'space':
             print("mode change")
             self.change_mode()
-            self.spell = ""
+            self.spellbuf.clear()
         # return-key to reset spell
         elif keyname == 'return':
             print("========return")
-            self.spell = ""
+            self.spellbuf.clear()
             self.fontd.change("  ")
-            self.spelld.change(self.spell)
+            self.spelld.clear()
             self.candidated.change([])
 
             if self.fullmatch:
@@ -395,16 +407,16 @@ class GameLoop:
                 play_effect_pinpon()
                 self.fullmatch = None
         else:
-            label = self.key_decoder.do(keyname, shift)
-            self.spell += label
-            self.spell = self.dakutenf.fix(self.spell) #gengo izon no bubun ga rosyutushite shimatteiru
-            print(f"now = {self.spell}")
+            romaji,label = self.knd.do(keyname, shift, self.mode)
+            self.spellbuf.put(label)
 
-            self.sp.play(keyname)
+            print(f"romaji={romaji}, label={label}, spellbuf={self.spellbuf.get()}")
+
+            self.sp.play(romaji,self.mode)
             self.fontd.change(label)
-            self.spelld.change(self.spell)
+            self.spelld.change(self.spellbuf.get())
 
-            candidate, self.fullmatch = self.wd.get_candidate(self.spell)
+            candidate, self.fullmatch = self.wd.get_candidate(self.spellbuf.get())
             if len(candidate) > 0:
                 for i,c in enumerate(candidate):
                     print(f" candidate[{i}]:{c}")
@@ -427,6 +439,7 @@ if __name__ == '__main__':
     pygame.display.set_caption('Speaking Keyboard')
 
     clock = pygame.time.Clock()
+
 
     g = GameLoop()
     while True:
