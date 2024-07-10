@@ -322,7 +322,6 @@ class KeynameDecoder:
                 label = self.romaji2label(romaji,self.katakana_label)
         return romaji,label
 
-
 class GameLoop:
     def __init__(self):
         fontObj = pygame.font.Font('freesansbold.ttf', 60)
