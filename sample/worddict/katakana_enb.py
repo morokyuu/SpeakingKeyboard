@@ -5,10 +5,9 @@ df = pd.read_csv("kata2")
 df.columns = ['id','has_katakana']
 
 
-df = df.replace('-',False)
-# df[df['has_katakana'] == '-'] = False
-# df[df['has_katakana'] != False] = True
+# df = df.replace('-',False)
 
+df.loc[df.has_katakana == '-', 'has_katakana'] = False
 df.loc[df.has_katakana != False, 'has_katakana'] = True
 
 print(df)
