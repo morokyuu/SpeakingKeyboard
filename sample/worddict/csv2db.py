@@ -1,3 +1,6 @@
+## prototype for tango.db
+## DO NOT USE FOR APPENDING WORDS
+
 import sqlite3
 import pandas as pd
 
