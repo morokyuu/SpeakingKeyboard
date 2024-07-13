@@ -3,6 +3,12 @@
 Created on Sat Jul 13 23:56:25 2024
 
 @author: square
+
+単語をCSVから読み込んでデータベースに登録するスクリプト
+CSVに書かれている単語を読み取りデータベース化する。
+
+words_org.csvがメインの単語データ。
+idはテキストファイルに直書きすることで、関連テーブルとの紐づけが切れないようにする。
 """
 
 import sqlite3
@@ -19,12 +25,3 @@ with sqlite3.connect(dbname) as conn:
 
 
 
-
-df = pd.read_csv("katakana_enb.csv") ## カタカナ変換を有効にする場合はこのcsvに登録
-df.columns = ['id','has_katakana']
-
-dbname = 'tango.db'
-with sqlite3.connect(dbname) as conn:
-    cur = conn.cursor()
-    df.to_sql('katakana',conn,if_exists='replace',index=None)
-    print(df)
