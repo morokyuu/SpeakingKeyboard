@@ -13,6 +13,7 @@ from enum import Enum
 import re
 import random
 import string
+import sqlite3
 
 FULLSCREEN_MODE = False
 
@@ -179,6 +180,33 @@ class MojiSoundPlayer:
         except FileNotFoundError:
             play_effect_kotsu()
 
+class WordDict2:
+    def __init__(self):
+        dbname = 'tango.db'
+        self.conn = sqlite3.connect(dbname)
+        self.cur = self.conn.cursor()
+
+    def close(self):
+        print("WordDict close")
+        self.conn.close()
+
+    def get_candidate(self, text, mode):
+        if mode.HIRAGANA == mode:
+            targ = (f"{text}%",)
+            print(targ)
+            self.cur.execute("select * from words where word like ?",targ)
+            for row in self.cur:
+                print(row)
+        if mode.KATAKANA == mode:
+            ## todo katakana henkan
+            targ = (f"{text}%",)
+            print(targ)
+            self.cur.execute("select * from words inner join katakana on words.id = katakana.id where words.word like ? and katanaka.has_katakana = 1",targ)
+            for row in self.cur:
+                print(row)
+        candidate = []
+        fullmatch = ""
+        return candidate, fullmatch
 
 class WordDict:
     def __init__(self,dict_filepath):
@@ -341,13 +369,15 @@ class GameLoop:
 
         self.spellbuf = SpellBuffer()
 
-        self.wd = KanaWordDict()
+
+        self.wd = WordDict2()
         self.sp = MojiSoundPlayer()
 
         print(self.mode)
 
 
     def _halt(self):
+        self.wd.close()
         pygame.quit()
         sys.exit()
 
@@ -369,13 +399,10 @@ class GameLoop:
     def change_mode(self):
         if self.mode == Mode.HIRAGANA:
             self.mode = Mode.KATAKANA
-            self.wd = KanaWordDict()
         elif self.mode == Mode.KATAKANA:
             self.mode = Mode.ENGLISH
-            self.wd = EngWordDict()
         elif self.mode == Mode.ENGLISH:
             self.mode = Mode.HIRAGANA
-            self.wd = KanaWordDict()
         #self.sp.set_mode(self.mode)
         play_effect_modechange(self.mode)
 
@@ -416,7 +443,7 @@ class GameLoop:
             self.fontd.change(label)
             self.spelld.change(self.spellbuf.get())
 
-            candidate, self.fullmatch = self.wd.get_candidate(self.spellbuf.get())
+            candidate, self.fullmatch = self.wd.get_candidate(self.spellbuf.get(), self.mode)
             if len(candidate) > 0:
                 for i,c in enumerate(candidate):
                     print(f" candidate[{i}]:{c}")
