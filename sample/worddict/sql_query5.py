@@ -17,10 +17,10 @@ with sqlite3.connect(dbname) as conn:
     
     ## 下記1,2を別々に実行すると、動作がよくわかる
     
-    ## 1> likeにより "りんご","りょこう","りす"がのこる
-    # cur.execute("select * from words inner join katakana_flag on words.id = katakana_flag.id where words.word like ?",targ)
-    ## 2> has_katakana=1の条件を追加すると、"りょこう"はhas_katakana=0なので除外されて、"りす","りんご"がのこる
-    cur.execute("select * from words inner join katakana_flag on words.id = katakana_flag.id where words.word like ? and katakana_flag.has_katakana = 1",targ)
+    ## 1> JOINした後、whereでLIKE検索する場合。
+    cur.execute("select * from words inner join katakana on words.id = katakana.id where words.word like ?",targ)
+    ## 2> 1の条件に、has_katakana=1の条件を追加
+    # cur.execute("select * from words inner join katakana on words.id = katakana.id where words.word like ? and katakana.has_katakana = 1",targ)
     
     
     for row in cur:
