@@ -261,6 +261,7 @@ class DakutenFilter:
 
     # 濁点・半濁点に対応していない文字はそのまま素通りする
     def do(self, spell):
+        print(f"{spell}")
 
         if len(spell) > 1:
             new_input = spell[-1]
@@ -286,8 +287,8 @@ class SpellBuffer:
     def clear(self):
         self.spell = ""
 
-    def put(self,moji):
-        self.spell = self.spell + moji
+    def put(self,label):
+        self.spell = self.spell + label
         self.spell = self.dakuten.do(self.spell)
 
     def get(self):
@@ -303,23 +304,6 @@ class KeynameDecoder:
                      ',': "ne", '-': "ho", '.': "ru", '/': "me", ':': "ke", ';': "re", ']': "mu", '^': "he",
                      '\\': "ro", '@': ":", '[': '0'}
         self.kana_with_shift = {'z':"xtu",'7':"xya",'8':"xyu",'9':"xyo",'-':"nobashi"}
-
-        self.hiragana_label = {
-            'a': "あ", 'i': "い", 'u': "う", 'e': "え", 'o': "お", 'ka': "か", 'ki': "き", 'ku': "く", 'ke': "け", 'ko': "こ",
-            'sa': "さ", 'si': "し", 'su': "す", 'se': "せ", 'so': "そ", 'ta': "た", 'ti': "ち", 'tu': "つ", 'te': "て",
-            'to': "と", 'na': "な", 'ni': "に", 'nu': "ぬ", 'ne': "ね", 'no': "の", 'ha': "は", 'hi': "ひ", 'hu': "ふ",
-            'he': "へ", 'ho': "ほ", 'ma': "ま", 'mi': "み", 'mu': "む", 'me': "め", 'mo': "も", 'ya': "や", 'yu': "ゆ",
-            'yo': "よ", 'ra': "ら", 'ri': "り", 'ru': "る", 're': "れ", 'ro': "ろ", 'wa': "わ", 'wo': "を", 'nn': "ん",
-            '0':"゜",':':"゛",'xtu':"っ",'xya':"ゃ",'xyu':"ゅ",'xyo':"ょ",'nobashi':"ー"
-        }
-        self.katakana_label = {
-            'a': "ア", 'i': "イ", 'u': "ウ", 'e': "エ", 'o': "オ", 'ka': "カ", 'ki': "キ", 'ku': "ク", 'ke': "ケ", 'ko': "コ",
-            'sa': "サ", 'si': "シ", 'su': "ス", 'se': "セ", 'so': "ソ", 'ta': "タ", 'ti': "チ", 'tu': "ツ", 'te': "テ",
-            'to': "ト", 'na': "ナ", 'ni': "ニ", 'nu': "ヌ", 'ne': "ネ", 'no': "ノ", 'ha': "ハ", 'hi': "ヒ", 'hu': "フ",
-            'he': "ヘ", 'ho': "ホ", 'ma': "マ", 'mi': "ミ", 'mu': "ム", 'me': "メ", 'mo': "モ", 'ya': "ヤ", 'yu': "ユ",
-            'yo': "ヨ", 'ra': "ラ", 'ri': "リ", 'ru': "ル", 're': "レ", 'ro': "ロ", 'wa': "ワ", 'wo': "ヲ", 'nn': "ン",
-            '0':"゜",':':"゛",'xtu':"ッ",'xya':"ャ",'xyu':"ュ",'xyo':"ョ",'nobashi':"ー"
-        }
 
     def keyname2mojiname(self,keyname,shift):
         ## shift key
@@ -338,17 +322,8 @@ class KeynameDecoder:
                 val = ""
         return val
 
-    def mojiname2label(self,mojiname,label_dict):
-        ## label
-        try:
-            label = label_dict[mojiname]
-        except:
-            label = ""
-        return label
-
     def do(self,keyname,shift=False,mode=Mode.ENGLISH):
         mojiname = ""
-        label = ""
 
         if mode==Mode.ENGLISH:
             ## labelは小文字のままとし、表示するときに大文字小文字を好みで変更することにした
@@ -357,11 +332,39 @@ class KeynameDecoder:
                 mojiname = keyname
         elif mode == Mode.HIRAGANA or mode == Mode.KATAKANA:
             mojiname = self.keyname2mojiname(keyname, shift)
-            if mode==Mode.HIRAGANA:
-                label = self.mojiname2label(mojiname,self.hiragana_label)
-            elif mode==Mode.KATAKANA:
-                label = self.mojiname2label(mojiname,self.katakana_label)
-        return mojiname,label
+        return mojiname
+
+class Mojiname2Label:
+    def __init__(self):
+        self.hiragana_label = {
+            'a': "あ", 'i': "い", 'u': "う", 'e': "え", 'o': "お", 'ka': "か", 'ki': "き", 'ku': "く", 'ke': "け", 'ko': "こ",
+            'sa': "さ", 'si': "し", 'su': "す", 'se': "せ", 'so': "そ", 'ta': "た", 'ti': "ち", 'tu': "つ", 'te': "て",
+            'to': "と", 'na': "な", 'ni': "に", 'nu': "ぬ", 'ne': "ね", 'no': "の", 'ha': "は", 'hi': "ひ", 'hu': "ふ",
+            'he': "へ", 'ho': "ほ", 'ma': "ま", 'mi': "み", 'mu': "む", 'me': "め", 'mo': "も", 'ya': "や", 'yu': "ゆ",
+            'yo': "よ", 'ra': "ら", 'ri': "り", 'ru': "る", 're': "れ", 'ro': "ろ", 'wa': "わ", 'wo': "を", 'nn': "ん",
+            '0':"゜",':':"゛",'xtu':"っ",'xya':"ゃ",'xyu':"ゅ",'xyo':"ょ",'nobashi':"ー"
+        }
+        self.katakana_label = {
+            'a': "ア", 'i': "イ", 'u': "ウ", 'e': "エ", 'o': "オ", 'ka': "カ", 'ki': "キ", 'ku': "ク", 'ke': "ケ", 'ko': "コ",
+            'sa': "サ", 'si': "シ", 'su': "ス", 'se': "セ", 'so': "ソ", 'ta': "タ", 'ti': "チ", 'tu': "ツ", 'te': "テ",
+            'to': "ト", 'na': "ナ", 'ni': "ニ", 'nu': "ヌ", 'ne': "ネ", 'no': "ノ", 'ha': "ハ", 'hi': "ヒ", 'hu': "フ",
+            'he': "ヘ", 'ho': "ホ", 'ma': "マ", 'mi': "ミ", 'mu': "ム", 'me': "メ", 'mo': "モ", 'ya': "ヤ", 'yu': "ユ",
+            'yo': "ヨ", 'ra': "ラ", 'ri': "リ", 'ru': "ル", 're': "レ", 'ro': "ロ", 'wa': "ワ", 'wo': "ヲ", 'nn': "ン",
+            '0':"゜",':':"゛",'xtu':"ッ",'xya':"ャ",'xyu':"ュ",'xyo':"ョ",'nobashi':"ー"
+        }
+    def do(self,mojiname,mode):
+        if mode == mode.ENGLISH:
+            label = mojiname
+        else:
+            label_dict = self.hiragana_label
+            if mode == mode.KATAKANA:
+                label_dict = self.katakana_label
+            ## label
+            try:
+                label = label_dict[mojiname]
+            except:
+                label = ""
+        return label
 
 class GameLoop:
     def __init__(self):
@@ -379,6 +382,8 @@ class GameLoop:
 
         self.mode = Mode.HIRAGANA
         self.knd = KeynameDecoder()
+        self.moji2label = Mojiname2Label()
+
 
         self.spellbuf = SpellBuffer()
 
@@ -447,7 +452,9 @@ class GameLoop:
                 play_effect_pinpon()
                 self.fullmatch = None
         else:
-            mojiname,label = self.knd.do(keyname, shift, self.mode)
+            mojiname = self.knd.do(keyname, shift, self.mode)
+            label = self.moji2label.do(mojiname,self.mode)
+
             self.spellbuf.put(label)
 
             print(f"mojiname={mojiname}, label={label}, spellbuf={self.spellbuf.get()}")
