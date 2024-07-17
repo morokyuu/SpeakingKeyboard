@@ -202,6 +202,7 @@ class WordDict2:
             inner join katakana
             on words.id = katakana.id
             where word like ?""",targ)
+
     def otherMode(self,spell):
         targ = (f"{spell}%",)
         print(targ)
@@ -213,6 +214,7 @@ class WordDict2:
         else:
             self.otherMode(spell)
 
+        self.cur.rowcount()
         for row in self.cur:
             print(row)
         candidate = []
