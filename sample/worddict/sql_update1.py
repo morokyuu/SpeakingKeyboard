@@ -79,6 +79,9 @@ with sqlite3.connect(dbname) as conn:
     countup(4)
     printData("id=3 update",cur)
     
+    a = cur.execute('SELECT COUNT(id) FROM users').fetchone()[0]
     
+    b = cur.execute('SELECT COUNT(id) FROM (SELECT * FROM users where count > 10)').fetchone()[0]
+    #a = cur.rowcount()
     
     

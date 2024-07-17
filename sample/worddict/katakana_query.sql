@@ -1,0 +1,1 @@
+select * from words inner join katakana on words.id = katakana.id where word like '‚·%'
