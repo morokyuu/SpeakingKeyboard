@@ -324,12 +324,8 @@ class KeynameDecoder:
 
     def do(self,keyname,shift=False,mode=Mode.ENGLISH):
         mojiname = ""
-
         if mode==Mode.ENGLISH:
-            ## labelは小文字のままとし、表示するときに大文字小文字を好みで変更することにした
-            if keyname in string.ascii_letters + string.digits:
-                label = keyname
-                mojiname = keyname
+            mojiname = keyname
         elif mode == Mode.HIRAGANA or mode == Mode.KATAKANA:
             mojiname = self.keyname2mojiname(keyname, shift)
         return mojiname
