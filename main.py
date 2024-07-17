@@ -345,7 +345,7 @@ class Kanamoji:
         try:
             label = self.kana2hira_dict[label]
         except:
-            label = ""
+            label = label
         return label
 
     def mojiname2label(self,mojiname,mode):
@@ -479,7 +479,11 @@ if __name__ == '__main__':
     label = kanamoji.kana2hira('カ')
     print(f'ユニットテスト中　{label}')
 
-    spell = 'デバッグ'
+    spell = 'デバッグとバイキンマンとカレーパンマン'
+    hira_spell = ''.join([kanamoji.kana2hira(s) for s in spell])
+    print(f'{spell}, {hira_spell}')
+
+    spell = '「オッケー、おうじ。」abcde'
     hira_spell = ''.join([kanamoji.kana2hira(s) for s in spell])
     print(f'{spell}, {hira_spell}')
 
