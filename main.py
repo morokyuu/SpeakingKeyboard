@@ -200,32 +200,45 @@ class WordDict2:
         print(f'henkan {spell} -> {hira_spell}')
         targ = (f"{hira_spell}%",)
 
+        candidate = []
+        fullmatch = ""
         rows = self.cur.execute("""
             select * from words
             inner join katakana
             on words.id = katakana.id
             where word like ?""",targ).fetchall()
-        return self.readWord(rows)
+        candidate = self.readWord(rows)
+
+        count = len(candidate)
+        print(f'count={count}, {candidate}, hira_spell={hira_spell}')
+        if count == 1 and hira_spell == candidate[0]:
+            fullmatch = candidate[0]
+            print(f'fullmatch={fullmatch}')
+
+        return candidate,fullmatch
 
     def otherMode(self,spell):
+        candidate = []
+        fullmatch = ""
         targ = (f"{spell}%",)
-        print(targ)
         rows = self.cur.execute("select * from words where word like ?", targ).fetchall()
-        return self.readWord(rows)
+        candidate = self.readWord(rows)
+        count = len(candidate)
+        print(f'count={count}, {candidate}, spell={spell}')
+        if count == 1 and spell == candidate[0]:
+            fullmatch = candidate[0]
+            print(f'fullmatch={fullmatch}')
+        return candidate,fullmatch
 
     def get_candidate(self, spell, mode):
-        rows = []
         if mode.KATAKANA == mode:
-            rows = self.katakanaMode(spell)
+            candidate,fullmatch = self.katakanaMode(spell)
         else:
-            rows = self.otherMode(spell)
-        count = len(rows)
-        # print(f'{rows}, {count}')
+            candidate,fullmatch = self.otherMode(spell)
 
         for row in self.cur:
             print(row)
-        candidate = []
-        fullmatch = ""
+
         return candidate, fullmatch
 
 class WordDict:
