@@ -165,14 +165,14 @@ def play_effect_pinpon():
 class MojiSoundPlayer:
     def __init__(self):
         pass
-    def play(self,romaji,mode):
-        print(romaji)
+    def play(self,mojiname,mode):
+        print(mojiname)
         path = ""
         if mode == mode.HIRAGANA or mode == mode.KATAKANA:
-            romaji = romaji.upper()
-            path = f"wav//hiragana//{romaji}.mp3"
+            mojiname = mojiname.upper()
+            path = f"wav//hiragana//{mojiname}.mp3"
         else:
-            path = f"wav//english//{romaji}.mp3"
+            path = f"wav//english//{mojiname}.mp3"
         print(path)
 
         try:
@@ -302,7 +302,7 @@ class KeynameDecoder:
                      'r': "su", 's': "to", 't': "ka", 'u': "na", 'v': "hi", 'w': "te", 'x': "sa", 'y': "nn", 'z': "tu",
                      ',': "ne", '-': "ho", '.': "ru", '/': "me", ':': "ke", ';': "re", ']': "mu", '^': "he",
                      '\\': "ro", '@': ":", '[': '0'}
-        self.sokuon_youon_nobashi= {'z':"xtu",'7':"xya",'8':"xyu",'9':"xyo",'-':"nobashi"}
+        self.kana_with_shift = {'z':"xtu",'7':"xya",'8':"xyu",'9':"xyo",'-':"nobashi"}
 
         self.hiragana_label = {
             'a': "あ", 'i': "い", 'u': "う", 'e': "え", 'o': "お", 'ka': "か", 'ki': "き", 'ku': "く", 'ke': "け", 'ko': "こ",
@@ -321,13 +321,13 @@ class KeynameDecoder:
             '0':"゜",':':"゛",'xtu':"ッ",'xya':"ャ",'xyu':"ュ",'xyo':"ョ",'nobashi':"ー"
         }
 
-    def keyname2romaji(self,keyname,shift):
+    def keyname2mojiname(self,keyname,shift):
         ## shift key
         if not "shift" in keyname and shift == True:
             #print(f'keyname={keyname} shift={shift}')
             ## with shift key (keyname='left shift' or 'right shift')
             try:
-                val = self.sokuon_youon_nobashi[keyname]
+                val = self.kana_with_shift[keyname]
             except:
                 val = ""
         else:
@@ -338,30 +338,30 @@ class KeynameDecoder:
                 val = ""
         return val
 
-    def romaji2label(self,romaji,label_dict):
+    def mojiname2label(self,mojiname,label_dict):
         ## label
         try:
-            label = label_dict[romaji]
+            label = label_dict[mojiname]
         except:
             label = ""
         return label
 
     def do(self,keyname,shift=False,mode=Mode.ENGLISH):
-        romaji = ""
+        mojiname = ""
         label = ""
 
         if mode==Mode.ENGLISH:
             ## labelは小文字のままとし、表示するときに大文字小文字を好みで変更することにした
             if keyname in string.ascii_letters + string.digits:
                 label = keyname
-                romaji = keyname
+                mojiname = keyname
         elif mode == Mode.HIRAGANA or mode == Mode.KATAKANA:
-            romaji = self.keyname2romaji(keyname, shift)
+            mojiname = self.keyname2mojiname(keyname, shift)
             if mode==Mode.HIRAGANA:
-                label = self.romaji2label(romaji,self.hiragana_label)
+                label = self.mojiname2label(mojiname,self.hiragana_label)
             elif mode==Mode.KATAKANA:
-                label = self.romaji2label(romaji,self.katakana_label)
-        return romaji,label
+                label = self.mojiname2label(mojiname,self.katakana_label)
+        return mojiname,label
 
 class GameLoop:
     def __init__(self):
@@ -447,12 +447,12 @@ class GameLoop:
                 play_effect_pinpon()
                 self.fullmatch = None
         else:
-            romaji,label = self.knd.do(keyname, shift, self.mode)
+            mojiname,label = self.knd.do(keyname, shift, self.mode)
             self.spellbuf.put(label)
 
-            print(f"romaji={romaji}, label={label}, spellbuf={self.spellbuf.get()}")
+            print(f"mojiname={mojiname}, label={label}, spellbuf={self.spellbuf.get()}")
 
-            self.sp.play(romaji,self.mode)
+            self.sp.play(mojiname,self.mode)
             self.fontd.change(label)
             self.spelld.change(self.spellbuf.get())
 
