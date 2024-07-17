@@ -166,6 +166,7 @@ class MojiSoundPlayer:
     def __init__(self):
         pass
     def play(self,romaji,mode):
+        print(romaji)
         path = ""
         if mode == mode.HIRAGANA or mode == mode.KATAKANA:
             romaji = romaji.upper()
@@ -196,13 +197,20 @@ class WordDict2:
             targ = (f"{text}%",)
             print(targ)
             self.cur.execute("""
-                select * from words
-                inner join katakana
-                on words.id = katakana.id
-                where words.word like ? and katanaka.has_katakana = 1
-                """,targ)
+            select * from words
+            inner join katakana
+            on words.id = katakana.id
+            """)
             for row in self.cur:
                 print(row)
+#            self.cur.execute("""
+#                select * from words
+#                inner join katakana
+#                on words.id = katakana.id
+#                where words.word like ? and katanaka.has_katakana = 1
+#                """,targ)
+#            for row in self.cur:
+#                print(row)
         else:
             targ = (f"{text}%",)
             print(targ)
