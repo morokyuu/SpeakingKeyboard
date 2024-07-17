@@ -13,6 +13,7 @@ from enum import Enum
 import re
 import random
 import string
+import sqlite3
 
 FULLSCREEN_MODE = False
 
@@ -164,13 +165,14 @@ def play_effect_pinpon():
 class MojiSoundPlayer:
     def __init__(self):
         pass
-    def play(self,romaji,mode):
+    def play(self,mojiname,mode):
+        print(mojiname)
         path = ""
         if mode == mode.HIRAGANA or mode == mode.KATAKANA:
-            romaji = romaji.upper()
-            path = f"wav//hiragana//{romaji}.mp3"
+            mojiname = mojiname.upper()
+            path = f"wav//hiragana//{mojiname}.mp3"
         else:
-            path = f"wav//english//{romaji}.mp3"
+            path = f"wav//english//{mojiname}.mp3"
         print(path)
 
         try:
@@ -179,6 +181,65 @@ class MojiSoundPlayer:
         except FileNotFoundError:
             play_effect_kotsu()
 
+class WordDict2:
+    def __init__(self):
+        dbname = 'tango.db'
+        self.conn = sqlite3.connect(dbname)
+        self.cur = self.conn.cursor()
+        self.kanamoji = Kanamoji()
+
+    def close(self):
+        print("WordDict close")
+        self.conn.close()
+
+    def readWord(self,rows):
+        return [r[1] for r in rows]
+
+    def katakanaMode(self,spell):
+        hira_spell = ''.join([self.kanamoji.kana2hira(s) for s in spell])
+        print(f'henkan {spell} -> {hira_spell}')
+        targ = (f"{hira_spell}%",)
+
+        candidate = []
+        fullmatch = ""
+        rows = self.cur.execute("""
+            select * from words
+            inner join katakana
+            on words.id = katakana.id
+            where word like ?""",targ).fetchall()
+        candidate = self.readWord(rows)
+
+        count = len(candidate)
+        print(f'count={count}, {candidate}, hira_spell={hira_spell}')
+        if count == 1 and hira_spell == candidate[0]:
+            fullmatch = candidate[0]
+            print(f'fullmatch={fullmatch}')
+
+        return candidate,fullmatch
+
+    def otherMode(self,spell):
+        candidate = []
+        fullmatch = ""
+        targ = (f"{spell}%",)
+        rows = self.cur.execute("select * from words where word like ?", targ).fetchall()
+        candidate = self.readWord(rows)
+        count = len(candidate)
+        print(f'count={count}, {candidate}, spell={spell}')
+        if count == 1 and spell == candidate[0]:
+            fullmatch = candidate[0]
+            print(f'fullmatch={fullmatch}')
+        return candidate,fullmatch
+
+    def get_candidate(self, spell, mode):
+        if mode.KATAKANA == mode:
+            candidate,fullmatch = self.katakanaMode(spell)
+        else:
+            candidate,fullmatch = self.otherMode(spell)
+
+        for row in self.cur:
+            print(row)
+
+        return candidate, fullmatch
 
 class WordDict:
     def __init__(self,dict_filepath):
@@ -220,6 +281,7 @@ class DakutenFilter:
 
     # 濁点・半濁点に対応していない文字はそのまま素通りする
     def do(self, spell):
+        print(f"{spell}")
 
         if len(spell) > 1:
             new_input = spell[-1]
@@ -245,8 +307,8 @@ class SpellBuffer:
     def clear(self):
         self.spell = ""
 
-    def put(self,moji):
-        self.spell = self.spell + moji
+    def put(self,label):
+        self.spell = self.spell + label
         self.spell = self.dakuten.do(self.spell)
 
     def get(self):
@@ -261,8 +323,35 @@ class KeynameDecoder:
                      'r': "su", 's': "to", 't': "ka", 'u': "na", 'v': "hi", 'w': "te", 'x': "sa", 'y': "nn", 'z': "tu",
                      ',': "ne", '-': "ho", '.': "ru", '/': "me", ':': "ke", ';': "re", ']': "mu", '^': "he",
                      '\\': "ro", '@': ":", '[': '0'}
-        self.sokuon_youon_nobashi= {'z':"xtu",'7':"xya",'8':"xyu",'9':"xyo",'-':"nobashi"}
+        self.kana_with_shift = {'z':"xtu",'7':"xya",'8':"xyu",'9':"xyo",'-':"nobashi"}
 
+    def keyname2mojiname(self,keyname,shift):
+        ## shift key
+        if not "shift" in keyname and shift == True:
+            #print(f'keyname={keyname} shift={shift}')
+            ## with shift key (keyname='left shift' or 'right shift')
+            try:
+                val = self.kana_with_shift[keyname]
+            except:
+                val = ""
+        else:
+            ## without shift key
+            try:
+                val = self.kana[keyname]
+            except:
+                val = ""
+        return val
+
+    def do(self,keyname,shift=False,mode=Mode.ENGLISH):
+        mojiname = ""
+        if mode==Mode.ENGLISH:
+            mojiname = keyname
+        elif mode == Mode.HIRAGANA or mode == Mode.KATAKANA:
+            mojiname = self.keyname2mojiname(keyname, shift)
+        return mojiname
+
+class Kanamoji:
+    def __init__(self):
         self.hiragana_label = {
             'a': "あ", 'i': "い", 'u': "う", 'e': "え", 'o': "お", 'ka': "か", 'ki': "き", 'ku': "く", 'ke': "け", 'ko': "こ",
             'sa': "さ", 'si': "し", 'su': "す", 'se': "せ", 'so': "そ", 'ta': "た", 'ti': "ち", 'tu': "つ", 'te': "て",
@@ -279,48 +368,30 @@ class KeynameDecoder:
             'yo': "ヨ", 'ra': "ラ", 'ri': "リ", 'ru': "ル", 're': "レ", 'ro': "ロ", 'wa': "ワ", 'wo': "ヲ", 'nn': "ン",
             '0':"゜",':':"゛",'xtu':"ッ",'xya':"ャ",'xyu':"ュ",'xyo':"ョ",'nobashi':"ー"
         }
+        self.hira_daku = 'がぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽ'
+        self.kana_daku = 'ガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポ'
+        self.kana2hira_dict = kana2hira_dict = dict([(self.katakana_label[key],self.hiragana_label[key]) for key in self.hiragana_label.keys()]) | dict([(k, h) for k, h in zip(self.kana_daku, self.hira_daku)])
 
-    def keyname2romaji(self,keyname,shift):
-        ## shift key
-        if not "shift" in keyname and shift == True:
-            #print(f'keyname={keyname} shift={shift}')
-            ## with shift key (keyname='left shift' or 'right shift')
-            try:
-                val = self.sokuon_youon_nobashi[keyname]
-            except:
-                val = ""
-        else:
-            ## without shift key
-            try:
-                val = self.kana[keyname]
-            except:
-                val = ""
-        return val
-
-    def romaji2label(self,romaji,label_dict):
-        ## label
+    def kana2hira(self,label):
         try:
-            label = label_dict[romaji]
+            label = self.kana2hira_dict[label]
         except:
-            label = ""
+            label = label
         return label
 
-    def do(self,keyname,shift=False,mode=Mode.ENGLISH):
-        romaji = ""
-        label = ""
-
-        if mode==Mode.ENGLISH:
-            ## labelは小文字のままとし、表示するときに大文字小文字を好みで変更することにした
-            if keyname in string.ascii_letters + string.digits:
-                label = keyname
-                romaji = keyname
-        elif mode == Mode.HIRAGANA or mode == Mode.KATAKANA:
-            romaji = self.keyname2romaji(keyname, shift)
-            if mode==Mode.HIRAGANA:
-                label = self.romaji2label(romaji,self.hiragana_label)
-            elif mode==Mode.KATAKANA:
-                label = self.romaji2label(romaji,self.katakana_label)
-        return romaji,label
+    def mojiname2label(self,mojiname,mode):
+        if mode == mode.ENGLISH:
+            label = mojiname
+        else:
+            label_dict = self.hiragana_label
+            if mode == mode.KATAKANA:
+                label_dict = self.katakana_label
+            ## label
+            try:
+                label = label_dict[mojiname]
+            except:
+                label = ""
+        return label
 
 class GameLoop:
     def __init__(self):
@@ -338,16 +409,20 @@ class GameLoop:
 
         self.mode = Mode.HIRAGANA
         self.knd = KeynameDecoder()
+        self.kanamoji = Kanamoji()
+
 
         self.spellbuf = SpellBuffer()
 
-        self.wd = KanaWordDict()
+
+        self.wd = WordDict2()
         self.sp = MojiSoundPlayer()
 
         print(self.mode)
 
 
     def _halt(self):
+        self.wd.close()
         pygame.quit()
         sys.exit()
 
@@ -369,13 +444,10 @@ class GameLoop:
     def change_mode(self):
         if self.mode == Mode.HIRAGANA:
             self.mode = Mode.KATAKANA
-            self.wd = KanaWordDict()
         elif self.mode == Mode.KATAKANA:
             self.mode = Mode.ENGLISH
-            self.wd = EngWordDict()
         elif self.mode == Mode.ENGLISH:
             self.mode = Mode.HIRAGANA
-            self.wd = KanaWordDict()
         #self.sp.set_mode(self.mode)
         play_effect_modechange(self.mode)
 
@@ -407,16 +479,18 @@ class GameLoop:
                 play_effect_pinpon()
                 self.fullmatch = None
         else:
-            romaji,label = self.knd.do(keyname, shift, self.mode)
+            mojiname = self.knd.do(keyname, shift, self.mode)
+            label = self.kanamoji.mojiname2label(mojiname,self.mode)
+
             self.spellbuf.put(label)
 
-            print(f"romaji={romaji}, label={label}, spellbuf={self.spellbuf.get()}")
+            print(f"mojiname={mojiname}, label={label}, spellbuf={self.spellbuf.get()}")
 
-            self.sp.play(romaji,self.mode)
+            self.sp.play(mojiname,self.mode)
             self.fontd.change(label)
             self.spelld.change(self.spellbuf.get())
 
-            candidate, self.fullmatch = self.wd.get_candidate(self.spellbuf.get())
+            candidate, self.fullmatch = self.wd.get_candidate(self.spellbuf.get(), self.mode)
             if len(candidate) > 0:
                 for i,c in enumerate(candidate):
                     print(f" candidate[{i}]:{c}")
