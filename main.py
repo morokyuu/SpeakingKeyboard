@@ -330,7 +330,7 @@ class KeynameDecoder:
             mojiname = self.keyname2mojiname(keyname, shift)
         return mojiname
 
-class Mojiname2Label:
+class Kanamoji:
     def __init__(self):
         self.hiragana_label = {
             'a': "あ", 'i': "い", 'u': "う", 'e': "え", 'o': "お", 'ka': "か", 'ki': "き", 'ku': "く", 'ke': "け", 'ko': "こ",
@@ -348,7 +348,16 @@ class Mojiname2Label:
             'yo': "ヨ", 'ra': "ラ", 'ri': "リ", 'ru': "ル", 're': "レ", 'ro': "ロ", 'wa': "ワ", 'wo': "ヲ", 'nn': "ン",
             '0':"゜",':':"゛",'xtu':"ッ",'xya':"ャ",'xyu':"ュ",'xyo':"ョ",'nobashi':"ー"
         }
-    def do(self,mojiname,mode):
+        self.kana2hira_dict = dict([(k,h) for k,h in zip(self.katakana_label,self.hiragana_label)])
+
+    def kana2hira(self,label):
+        try:
+            label = self.kana2hira_dict[label]
+        except:
+            label = ""
+        return label
+
+    def mojiname2label(self,mojiname,mode):
         if mode == mode.ENGLISH:
             label = mojiname
         else:
@@ -378,7 +387,7 @@ class GameLoop:
 
         self.mode = Mode.HIRAGANA
         self.knd = KeynameDecoder()
-        self.moji2label = Mojiname2Label()
+        self.kanamoji = Kanamoji()
 
 
         self.spellbuf = SpellBuffer()
@@ -449,7 +458,7 @@ class GameLoop:
                 self.fullmatch = None
         else:
             mojiname = self.knd.do(keyname, shift, self.mode)
-            label = self.moji2label.do(mojiname,self.mode)
+            label = self.kanamoji.mojiname2label(mojiname,self.mode)
 
             self.spellbuf.put(label)
 
