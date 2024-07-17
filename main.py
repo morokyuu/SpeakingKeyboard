@@ -202,18 +202,19 @@ class WordDict2:
             inner join katakana
             on words.id = katakana.id
             where word like ?""",targ)
-        for row in self.cur:
-            print(row)
+    def otherMode(self,spell):
+        targ = (f"{spell}%",)
+        print(targ)
+        self.cur.execute("select * from words where word like ?", targ)
 
     def get_candidate(self, spell, mode):
         if mode.KATAKANA == mode:
             self.katakanaMode(spell)
         else:
-            targ = (f"{spell}%",)
-            print(targ)
-            self.cur.execute("select * from words where word like ?",targ)
-            for row in self.cur:
-                print(row)
+            self.otherMode(spell)
+
+        for row in self.cur:
+            print(row)
         candidate = []
         fullmatch = ""
         return candidate, fullmatch
