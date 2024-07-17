@@ -192,29 +192,36 @@ class WordDict2:
         print("WordDict close")
         self.conn.close()
 
+    def readWord(self,rows):
+        return [r[1] for r in rows]
+
     def katakanaMode(self,spell):
         hira_spell = ''.join([self.kanamoji.kana2hira(s) for s in spell])
         print(f'henkan {spell} -> {hira_spell}')
         targ = (f"{hira_spell}%",)
 
-        self.cur.execute("""
+        rows = self.cur.execute("""
             select * from words
             inner join katakana
             on words.id = katakana.id
-            where word like ?""",targ)
+            where word like ?""",targ).fetchall()
+        return self.readWord(rows)
 
     def otherMode(self,spell):
         targ = (f"{spell}%",)
         print(targ)
-        self.cur.execute("select * from words where word like ?", targ)
+        rows = self.cur.execute("select * from words where word like ?", targ).fetchall()
+        return self.readWord(rows)
 
     def get_candidate(self, spell, mode):
+        rows = []
         if mode.KATAKANA == mode:
-            self.katakanaMode(spell)
+            rows = self.katakanaMode(spell)
         else:
-            self.otherMode(spell)
+            rows = self.otherMode(spell)
+        count = len(rows)
+        # print(f'{rows}, {count}')
 
-        self.cur.rowcount()
         for row in self.cur:
             print(row)
         candidate = []
