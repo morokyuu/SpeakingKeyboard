@@ -15,7 +15,7 @@ import random
 import string
 import sqlite3
 
-FULLSCREEN_MODE = False
+FULLSCREEN_MODE = True
 
 BLACK = (0, 0, 0)
 GREEN = (0, 255, 0)
@@ -181,7 +181,7 @@ class MojiSoundPlayer:
         except FileNotFoundError:
             play_effect_kotsu()
 
-class WordDict2:
+class WordDict:
     def __init__(self):
         dbname = 'tango.db'
         self.conn = sqlite3.connect(dbname)
@@ -240,32 +240,6 @@ class WordDict2:
             print(row)
 
         return candidate, fullmatch
-
-class WordDict:
-    def __init__(self,dict_filepath):
-        self.words = []
-        with open(dict_filepath, "r") as fp:
-            self.words = [l.rstrip() for l in fp.readlines()]
-
-    def get_candidate(self, text):
-        candidate = []
-        fullmatch = ""
-        pat = re.compile(text)
-        for w in self.words:
-            if re.match(pat, w):
-                candidate.append(w)
-            if re.fullmatch(pat, w):
-                fullmatch = w
-        return candidate, fullmatch
-
-class KanaWordDict(WordDict):
-    def __init__(self):
-        super().__init__("kana-dict.txt")
-
-class EngWordDict(WordDict):
-    def __init__(self):
-        super().__init__("eng-dict.txt")
-
 
 class DakutenFilter:
     def __init__(self):
@@ -415,7 +389,7 @@ class GameLoop:
         self.spellbuf = SpellBuffer()
 
 
-        self.wd = WordDict2()
+        self.wd = WordDict()
         self.sp = MojiSoundPlayer()
 
         print(self.mode)
