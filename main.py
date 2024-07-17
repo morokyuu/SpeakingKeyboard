@@ -337,7 +337,9 @@ class Kanamoji:
             'yo': "ヨ", 'ra': "ラ", 'ri': "リ", 'ru': "ル", 're': "レ", 'ro': "ロ", 'wa': "ワ", 'wo': "ヲ", 'nn': "ン",
             '0':"゜",':':"゛",'xtu':"ッ",'xya':"ャ",'xyu':"ュ",'xyo':"ョ",'nobashi':"ー"
         }
-        self.kana2hira_dict = kana2hira_dict = dict([(self.katakana_label[key],self.hiragana_label[key]) for key in self.hiragana_label.keys()])
+        self.hira_daku = 'がぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽ'
+        self.kana_daku = 'ガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポ'
+        self.kana2hira_dict = kana2hira_dict = dict([(self.katakana_label[key],self.hiragana_label[key]) for key in self.hiragana_label.keys()]) | dict([(k, h) for k, h in zip(self.kana_daku, self.hira_daku)])
 
     def kana2hira(self,label):
         try:
@@ -475,7 +477,11 @@ if __name__ == '__main__':
 
     kanamoji = Kanamoji()
     label = kanamoji.kana2hira('カ')
-    print(f'デバッグ　{label}')
+    print(f'ユニットテスト中　{label}')
+
+    spell = 'デバッグ'
+    hira_spell = ''.join([kanamoji.kana2hira(s) for s in spell])
+    print(f'{spell}, {hira_spell}')
 
     exit(0)
     pygame.init()

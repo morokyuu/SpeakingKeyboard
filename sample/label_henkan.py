@@ -21,6 +21,12 @@ katakana_label = {
     'yo': "ヨ", 'ra': "ラ", 'ri': "リ", 'ru': "ル", 're': "レ", 'ro': "ロ", 'wa': "ワ", 'wo': "ヲ", 'nn': "ン",
     '0':"゜",':':"゛",'xtu':"ッ",'xya':"ャ",'xyu':"ュ",'xyo':"ョ",'nobashi':"ー"
 }
+hira_daku = 'がぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽ'
+kana_daku = 'ガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポ'
+
+daku = dict([(k,h) for k,h in zip(kana_daku,hira_daku)])
+
+
 
 kana2hira_dict = dict([(katakana_label[key],hiragana_label[key]) for key in hiragana_label.keys()])
 # kana2hira_dict = dict([(k,h) for k,h in zip(katakana_label,hiragana_label)])
