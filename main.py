@@ -186,33 +186,22 @@ class WordDict2:
         dbname = 'tango.db'
         self.conn = sqlite3.connect(dbname)
         self.cur = self.conn.cursor()
+        self.kanamoji = Kanamoji()
 
     def close(self):
         print("WordDict close")
         self.conn.close()
 
-    def get_candidate(self, text, mode):
+    def katakanaMode(self,spell):
+        hira_spell = [self.kanamoji.kana2hira(s) for s in spell]
+        print(f'{spell}, {hira_spell}')
+
+
+    def get_candidate(self, spell, mode):
         if mode.KATAKANA == mode:
-            ## todo katakana henkan
-            targ = (f"{text}%",)
-            print(targ)
-            self.cur.execute("""
-            select * from words
-            inner join katakana
-            on words.id = katakana.id
-            """)
-            for row in self.cur:
-                print(row)
-#            self.cur.execute("""
-#                select * from words
-#                inner join katakana
-#                on words.id = katakana.id
-#                where words.word like ? and katanaka.has_katakana = 1
-#                """,targ)
-#            for row in self.cur:
-#                print(row)
+            self.katakanaMode(spell)
         else:
-            targ = (f"{text}%",)
+            targ = (f"{spell}%",)
             print(targ)
             self.cur.execute("select * from words where word like ?",targ)
             for row in self.cur:
@@ -348,7 +337,7 @@ class Kanamoji:
             'yo': "ヨ", 'ra': "ラ", 'ri': "リ", 'ru': "ル", 're': "レ", 'ro': "ロ", 'wa': "ワ", 'wo': "ヲ", 'nn': "ン",
             '0':"゜",':':"゛",'xtu':"ッ",'xya':"ャ",'xyu':"ュ",'xyo':"ョ",'nobashi':"ー"
         }
-        self.kana2hira_dict = dict([(k,h) for k,h in zip(self.katakana_label,self.hiragana_label)])
+        self.kana2hira_dict = kana2hira_dict = dict([(self.katakana_label[key],self.hiragana_label[key]) for key in self.hiragana_label.keys()])
 
     def kana2hira(self,label):
         try:
@@ -483,6 +472,12 @@ class GameLoop:
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
+
+    kanamoji = Kanamoji()
+    label = kanamoji.kana2hira('カ')
+    print(f'デバッグ　{label}')
+
+    exit(0)
     pygame.init()
     if FULLSCREEN_MODE:
         DISPLAYSURF = pygame.display.set_mode(size=WINDOWSIZE, display=0, depth=32, flags=pygame.FULLSCREEN)
