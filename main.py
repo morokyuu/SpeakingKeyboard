@@ -193,9 +193,17 @@ class WordDict2:
         self.conn.close()
 
     def katakanaMode(self,spell):
-        hira_spell = [self.kanamoji.kana2hira(s) for s in spell]
-        print(f'{spell}, {hira_spell}')
+        hira_spell = ''.join([self.kanamoji.kana2hira(s) for s in spell])
+        print(f'henkan {spell} -> {hira_spell}')
+        targ = (f"{hira_spell}%",)
 
+        self.cur.execute("""
+            select * from words
+            inner join katakana
+            on words.id = katakana.id
+            where word like ?""",targ)
+        for row in self.cur:
+            print(row)
 
     def get_candidate(self, spell, mode):
         if mode.KATAKANA == mode:
@@ -474,20 +482,6 @@ class GameLoop:
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-
-    kanamoji = Kanamoji()
-    label = kanamoji.kana2hira('カ')
-    print(f'ユニットテスト中　{label}')
-
-    spell = 'デバッグとバイキンマンとカレーパンマン'
-    hira_spell = ''.join([kanamoji.kana2hira(s) for s in spell])
-    print(f'{spell}, {hira_spell}')
-
-    spell = '「オッケー、おうじ。」abcde'
-    hira_spell = ''.join([kanamoji.kana2hira(s) for s in spell])
-    print(f'{spell}, {hira_spell}')
-
-    exit(0)
     pygame.init()
     if FULLSCREEN_MODE:
         DISPLAYSURF = pygame.display.set_mode(size=WINDOWSIZE, display=0, depth=32, flags=pygame.FULLSCREEN)
